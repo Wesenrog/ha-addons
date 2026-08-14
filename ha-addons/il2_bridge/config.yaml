@@ -1,0 +1,38 @@
+name: IL2 Bridge
+version: "1.0.0"
+slug: il2_bridge
+description: Rekonstruerer strom i L2 fra Aidon 3P3W HAN-data
+url: https://github.com/
+arch:
+  - aarch64
+  - armv7
+  - armhf
+  - amd64
+init: false
+startup: services
+boot: auto
+watchdog: "tcp://[HOST]:[PORT:0]"
+services:
+  - mqtt:need
+options:
+  src_topic: "ams/meter"
+  sequence: -1
+  stale_after: 30
+  field_u12: "U1"
+  field_u31: "U2"
+  field_u23: "U3"
+  field_i1: "I1"
+  field_i3: "I3"
+  field_p: "P"
+  field_q: "Q"
+schema:
+  src_topic: str
+  sequence: list(-1|1)
+  stale_after: int(5,600)
+  field_u12: str
+  field_u31: str
+  field_u23: str
+  field_i1: str
+  field_i3: str
+  field_p: str
+  field_q: str
