@@ -1,5 +1,17 @@
 # Endringslogg
 
+## 1.1.0
+
+- Publiserer hele maleoyeblikket som EN samlet JSON paa ett state-topic
+  (ams/derived/it3/state) i stedet for bare avledet I_L2.
+- Elleve entiteter under en felles enhet "Aidon IT-nett (beregnet)":
+  strom L1/L2/L3, alle tre linjespenninger, aktiv og reaktiv effekt,
+  samt diagnostikk (forkastet losning, fasemargin, gyldig-flagg).
+  Alle leser fra samme topic, saa de oppdateres atomisk fra samme sample.
+- Malte verdier publiseres alltid ferske; bare den avledede I_L2 holdes
+  fra forrige gyldige beregning naar konsistenssjekken slaar ut.
+- Den gamle enkeltsensoren it3_il2 fjernes automatisk fra Home Assistant.
+
 ## 1.0.6
 
 - Standard src_topic endret til amsreader/power. Med payload-formatet
