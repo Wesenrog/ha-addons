@@ -1,15 +1,35 @@
 #!/usr/bin/with-contenv bashio
 set -e
 
-if ! bashio::services.available "mqtt"; then
-    bashio::log.error "Ingen MQTT-tjeneste konfigurert i Home Assistant"
+# Hent en valgfri opsjon, tom streng hvis den ikke er satt.
+opt() {
+    if bashio::config.has_value "$1"; then
+        bashio::config "$1"
+    else
+        echo ""
+    fi
+}
+
+if bashio::config.has_value 'mqtt_host'; then
+    # Manuelt konfigurert broker har forrang.
+    export MQTT_HOST="$(bashio::config 'mqtt_host')"
+    export MQTT_PORT="$(bashio::config 'mqtt_port')"
+    export MQTT_USER="$(opt 'mqtt_user')"
+    export MQTT_PASS="$(opt 'mqtt_password')"
+    bashio::log.info "Bruker MQTT-broker fra tilleggets konfigurasjon"
+elif bashio::services.available "mqtt"; then
+    # Faller tilbake pa brokeren Home Assistant allerede kjenner.
+    export MQTT_HOST="$(bashio::services mqtt 'host')"
+    export MQTT_PORT="$(bashio::services mqtt 'port')"
+    export MQTT_USER="$(bashio::services mqtt 'username')"
+    export MQTT_PASS="$(bashio::services mqtt 'password')"
+    bashio::log.info "Bruker MQTT-tjenesten konfigurert i Home Assistant"
+else
+    bashio::log.error "Ingen MQTT-broker funnet."
+    bashio::log.error "Sett mqtt_host (og evt. mqtt_user/mqtt_password) i"
+    bashio::log.error "tilleggets konfigurasjon, eller sett opp MQTT-integrasjonen."
     exit 1
 fi
-
-export MQTT_HOST="$(bashio::services mqtt 'host')"
-export MQTT_PORT="$(bashio::services mqtt 'port')"
-export MQTT_USER="$(bashio::services mqtt 'username')"
-export MQTT_PASS="$(bashio::services mqtt 'password')"
 
 export SRC_TOPIC="$(bashio::config 'src_topic')"
 export SEQUENCE="$(bashio::config 'sequence')"
@@ -22,5 +42,11 @@ export F_I3="$(bashio::config 'field_i3')"
 export F_P="$(bashio::config 'field_p')"
 export F_Q="$(bashio::config 'field_q')"
 
-bashio::log.info "Kobler til ${MQTT_HOST}:${MQTT_PORT}, lytter paa ${SRC_TOPIC}"
+if [ -n "${MQTT_USER}" ]; then
+    bashio::log.info "Kobler til ${MQTT_HOST}:${MQTT_PORT} som ${MQTT_USER}"
+else
+    bashio::log.info "Kobler til ${MQTT_HOST}:${MQTT_PORT} anonymt"
+fi
+bashio::log.info "Lytter pa ${SRC_TOPIC}"
+
 exec python3 -u /app/il2_bridge.py

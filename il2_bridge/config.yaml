@@ -1,8 +1,8 @@
 name: IL2 Bridge
-version: "1.0.1"
+version: "1.0.2"
 slug: il2_bridge
 description: Rekonstruerer strom i L2 fra Aidon 3P3W HAN-data
-url: https://github.com/
+url: "https://github.com/DITT-BRUKERNAVN/ha-addons"
 arch:
   - aarch64
   - armv7
@@ -11,10 +11,10 @@ arch:
 init: false
 startup: services
 boot: auto
-watchdog: "tcp://[HOST]:[PORT:0]"
 services:
-  - mqtt:need
+  - mqtt:want
 options:
+  mqtt_port: 1883
   src_topic: "ams/meter"
   sequence: -1
   stale_after: 30
@@ -26,9 +26,13 @@ options:
   field_p: "P"
   field_q: "Q"
 schema:
+  mqtt_host: "str?"
+  mqtt_port: "int(1,65535)"
+  mqtt_user: "str?"
+  mqtt_password: "password?"
   src_topic: str
-  sequence: list(-1|1)
-  stale_after: int(5,600)
+  sequence: "list(-1|1)"
+  stale_after: "int(5,600)"
   field_u12: str
   field_u31: str
   field_u23: str

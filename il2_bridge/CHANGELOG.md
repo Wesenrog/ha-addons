@@ -1,5 +1,13 @@
 # Endringslogg
 
+## 1.0.2
+
+- Mulig a sette mqtt_host, mqtt_port, mqtt_user og mqtt_password manuelt.
+  Passordfeltet maskeres i UI-et.
+- Uten mqtt_host brukes fortsatt MQTT-tjenesten fra Home Assistant.
+- services endret fra mqtt:need til mqtt:want, slik at tillegget ogsa
+  starter mot en broker utenfor Home Assistant.
+
 ## 1.0.1
 
 - Fikset byggefeil: oppgir base-image eksplisitt. Supervisor 2026.04.0
