@@ -1,5 +1,5 @@
 name: IL2 Bridge
-version: "1.0.2"
+version: "1.0.3"
 slug: il2_bridge
 description: Rekonstruerer strom i L2 fra Aidon 3P3W HAN-data
 url: "https://github.com/DITT-BRUKERNAVN/ha-addons"

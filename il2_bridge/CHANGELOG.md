@@ -1,5 +1,10 @@
 # Endringslogg
 
+## 1.0.3
+
+- Avslutter med tydelig feilmelding ved avvist brukernavn/passord i stedet
+  for aa prove igjen i det uendelige mens tillegget ser friskt ut.
+
 ## 1.0.2
 
 - Mulig a sette mqtt_host, mqtt_port, mqtt_user og mqtt_password manuelt.
