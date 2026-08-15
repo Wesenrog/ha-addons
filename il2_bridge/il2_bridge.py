@@ -30,7 +30,8 @@ SRC_TOPIC = os.environ.get("SRC_TOPIC", "ams/meter")
 SEQUENCE = int(os.environ.get("SEQUENCE", "-1"))
 STALE_AFTER = float(os.environ.get("STALE_AFTER", "30"))
 
-# Aidon 3P3W: UL1 = L1-L2, UL2 = L1-L3, UL3 = L2-L3
+# Aidon 3P3W via amsreader: UL1 = L1-L2, UL2 = L1-L3, UL3 = L2-L3.
+# P og Q er import; PO og QO er eksport. Netto = import - eksport.
 FIELDS = {
     "U12": os.environ.get("F_U12", "U1"),
     "U31": os.environ.get("F_U31", "U2"),
@@ -39,6 +40,13 @@ FIELDS = {
     "I3": os.environ.get("F_I3", "I3"),
     "P": os.environ.get("F_P", "P"),
     "Q": os.environ.get("F_Q", "Q"),
+}
+
+# Valgfrie eksportfelter. Mangler de, regnes eksporten som null - en
+# melding blir ikke forkastet fordi anlegget ikke produserer.
+FIELDS_OUT = {
+    "PO": os.environ.get("F_P_OUT", "PO"),
+    "QO": os.environ.get("F_Q_OUT", "QO"),
 }
 
 DISCOVERY = {
@@ -61,6 +69,17 @@ DISCOVERY = {
 
 last_good = {"value": None, "t": 0.0}
 
+stats = {
+    "received": 0,       # meldinger pa src_topic
+    "incomplete": 0,     # manglet felter (typisk Aidon liste 1)
+    "valid": 0,          # vellykkede beregninger
+    "invalid": 0,        # konsistenssjekken slo ut
+    "last_keys": None,   # noklene i siste ufullstendige melding
+    "started": time.time(),
+    "first_logged": False,
+    "warned": False,
+}
+
 
 def dig(payload, key):
     """Hent en verdi, ogsaa fra en nostet 'data'-blokk."""
@@ -72,9 +91,24 @@ def dig(payload, key):
     return None
 
 
+# Feil som ikke loser seg av seg selv - nytter ikke aa prove igjen.
+FATAL_CONNECT_CODES = {4, 5, 134, 135}
+
+
 def on_connect(client, userdata, flags, reason_code, properties=None):
-    if reason_code != 0:
+    code = getattr(reason_code, "value", reason_code)
+    if code != 0:
         print(f"MQTT-tilkobling avvist: {reason_code}", file=sys.stderr)
+        if code in FATAL_CONNECT_CODES:
+            print(
+                f"Brukernavn/passord avvist av brokeren paa "
+                f"{MQTT_HOST}:{MQTT_PORT} (bruker: {MQTT_USER or '<anonym>'}).\n"
+                f"Sett mqtt_user og mqtt_password i tilleggets konfigurasjon, "
+                f"eller sjekk Mosquitto-loggen for aarsak.",
+                file=sys.stderr,
+            )
+            client.disconnect()
+            os._exit(1)
         return
     print(f"Tilkoblet. Abonnerer paa {SRC_TOPIC}", flush=True)
     client.publish(DISC_TOPIC, json.dumps(DISCOVERY), retain=True)
@@ -89,12 +123,20 @@ def on_message(client, userdata, msg):
     if not isinstance(payload, dict):
         return
 
+    stats["received"] += 1
     vals = {name: dig(payload, key) for name, key in FIELDS.items()}
 
     # Aidon liste 1 (hvert 2,5. sek) har bare aktiv effekt. Hopp over
     # ufullstendige meldinger, ellers regner vi paa blandede tidspunkter.
     if any(v is None for v in vals.values()):
+        stats["incomplete"] += 1
+        keys = sorted(payload.get("data", payload)) if isinstance(payload, dict) else []
+        stats["last_keys"] = keys
         return
+
+    # Netto effekt: import minus eksport.
+    p_out = dig(payload, FIELDS_OUT["PO"]) or 0.0
+    q_out = dig(payload, FIELDS_OUT["QO"]) or 0.0
 
     attrs = {"valid": False, "lead_deg": None, "alt_a": None, "error": None}
     try:
@@ -104,8 +146,8 @@ def on_message(client, userdata, msg):
             U31=float(vals["U31"]),
             I1=float(vals["I1"]),
             I3=float(vals["I3"]),
-            P=float(vals["P"]),
-            Q=float(vals["Q"]),
+            P=float(vals["P"]) - float(p_out),
+            Q=float(vals["Q"]) - float(q_out),
             sequence=SEQUENCE,
         )
         best, alt = sols[0], sols[1]
@@ -116,7 +158,14 @@ def on_message(client, userdata, msg):
             lead_deg=round(best[4], 1),
             alt_a=round(alt[0], 2),
         )
+        stats["valid"] += 1
+        if not stats["first_logged"]:
+            stats["first_logged"] = True
+            print(f"Forste vellykkede beregning: I_L2 = {best[0]:.2f} A "
+                  f"(alternativ losning {alt[0]:.2f} A, lead {best[4]:.1f} grader)",
+                  flush=True)
     except (ValueError, TypeError) as exc:
+        stats["invalid"] += 1
         attrs["error"] = str(exc)
 
     age = time.time() - last_good["t"]
@@ -138,7 +187,35 @@ def main():
     client.on_message = on_message
     client.will_set(AVAIL_TOPIC, "offline", retain=True)
     client.connect(MQTT_HOST, MQTT_PORT, 60)
-    client.loop_forever()
+    client.loop_start()
+
+    while True:
+        time.sleep(30)
+        age = time.time() - stats["started"]
+
+        if stats["received"] == 0:
+            if age > 60 and not stats["warned"]:
+                stats["warned"] = True
+                print(f"ADVARSEL: ingen meldinger mottatt paa '{SRC_TOPIC}' "
+                      f"etter {int(age)} s. Sjekk src_topic.", file=sys.stderr)
+            continue
+
+        if stats["valid"] == 0 and not stats["warned"]:
+            stats["warned"] = True
+            print(f"ADVARSEL: {stats['received']} meldinger mottatt, men ingen "
+                  f"kunne brukes.", file=sys.stderr)
+            if stats["last_keys"]:
+                print(f"  felter i meldingen : {stats['last_keys']}", file=sys.stderr)
+                print(f"  felter vi ser etter: {sorted(FIELDS.values())}",
+                      file=sys.stderr)
+                print("  Rett field_*-opsjonene i konfigurasjonen.", file=sys.stderr)
+            continue
+
+        if stats["valid"] and int(age) % 300 < 30:
+            print(f"Status: {stats['received']} mottatt, "
+                  f"{stats['valid']} beregnet, "
+                  f"{stats['incomplete']} ufullstendige, "
+                  f"{stats['invalid']} inkonsistente", flush=True)
 
 
 if __name__ == "__main__":

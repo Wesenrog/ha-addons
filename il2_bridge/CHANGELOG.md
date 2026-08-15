@@ -1,5 +1,24 @@
 # Endringslogg
 
+## 1.0.6
+
+- Standard src_topic endret til amsreader/power. Med payload-formatet
+  "Home-Assistant" sender amsreader maledataene dit, ikke til publish-
+  topicet direkte. Endrer ikke eksisterende installasjoner.
+
+## 1.0.5
+
+- Trekker fra eksportert effekt: netto P = P - PO, netto Q = Q - QO.
+  Amsreader rapporterer import og eksport hver for seg. Feltene er
+  valgfrie, sa meldinger uten dem forkastes ikke.
+
+## 1.0.4
+
+- Logger forste vellykkede beregning og statusoppsummering hvert 5. minutt.
+- Advarer hvis ingen meldinger kommer inn, eller hvis meldinger kommer inn
+  men ingen kan brukes - og lister da feltnavnene den saa mot dem den leter
+  etter, slik at feil field_*-oppsett blir synlig i loggen.
+
 ## 1.0.3
 
 - Avslutter med tydelig feilmelding ved avvist brukernavn/passord i stedet
