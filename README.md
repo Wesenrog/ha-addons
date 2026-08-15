@@ -5,7 +5,7 @@
 Innstillinger -> Tillegg -> Tilleggsbutikk -> tre prikker -> Repositories,
 og lim inn:
 
-    https://github.com/DITT-BRUKERNAVN/ha-addons
+    https://github.com/wesenrog/ha-addons
 
 ## IL2 Bridge
 
