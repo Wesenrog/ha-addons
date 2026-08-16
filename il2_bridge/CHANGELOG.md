@@ -1,5 +1,15 @@
 # Endringslogg
 
+## 1.3.0
+
+- Logger naar entiteten gaar utilgjengelig og tilgjengelig igjen, med
+  varighet og siste feilmelding.
+- Forkastede samples logges na med de faktiske inngangsverdiene (I1, I3,
+  alle tre spenninger, P og Q) - de tre forste i sin helhet, deretter
+  hoyst en per minutt slik at loggen ikke drukner.
+- Availability publiseres bare ved endring, ikke ved hver melding.
+- Statuslinja viser om entiteten er tilgjengelig.
+
 ## 1.2.0
 
 - Nytt felt meter_ts: tidsstempelet fra amsreader (feltet "t", konfigurerbart

@@ -82,6 +82,15 @@ SENSORS = [
 
 last_good = {"value": None, "alt": None, "lead": None, "t": 0.0}
 
+# Sporer availability slik at vi bare publiserer og logger ved endring,
+# ikke ved hver melding.
+avail = {"online": None, "since": 0.0}
+
+# Forkastede samples logges detaljert de forste gangene, deretter
+# strupet - ellers drukner loggen naar noe forst gaar galt.
+fail_log = {"t": 0.0}
+FAIL_LOG_INTERVAL = 60.0
+
 stats = {
     "received": 0,
     "incomplete": 0,
@@ -237,6 +246,15 @@ def on_message(client, userdata, msg):
     except (ValueError, TypeError) as exc:
         stats["invalid"] += 1
         state["error"] = str(exc)
+        now = time.time()
+        if stats["invalid"] <= 3 or now - fail_log["t"] >= FAIL_LOG_INTERVAL:
+            fail_log["t"] = now
+            print(f"Forkastet sample ({stats['invalid']} totalt): {exc}",
+                  file=sys.stderr)
+            print(f"  I1={state['i_l1']} A  I3={state['i_l3']} A  "
+                  f"U12={state['u_l1l2']} V  U23={state['u_l2l3']} V  "
+                  f"U31={state['u_l1l3']} V  P={state['p']} W  Q={state['q']} var",
+                  file=sys.stderr)
 
     # Malte verdier er alltid ferske. Bare den avledede I_L2 holdes fra
     # forrige gyldige beregning naar konsistenssjekken slaar ut.
@@ -252,10 +270,21 @@ def on_message(client, userdata, msg):
         state["i_l2_alt"] = round(last_good["alt"], 2)
         state["lead_deg"] = round(last_good["lead"], 1)
 
-    if last_good["value"] is None or age > STALE_AFTER:
-        client.publish(AVAIL_TOPIC, "offline", retain=True)
-    else:
-        client.publish(AVAIL_TOPIC, "online", retain=True)
+    online = last_good["value"] is not None and age <= STALE_AFTER
+    if online != avail["online"]:
+        now = time.time()
+        if avail["online"] is None:
+            pass  # forste melding, ingen overgang aa rapportere
+        elif online:
+            print(f"Tilgjengelig igjen etter {now - avail['since']:.0f} s "
+                  f"utilgjengelig.", flush=True)
+        else:
+            print(f"UTILGJENGELIG: ingen gyldig beregning paa {age:.0f} s "
+                  f"(stale_after={STALE_AFTER:.0f} s). "
+                  f"Siste feil: {state['error'] or 'ingen'}", file=sys.stderr)
+        avail["online"] = online
+        avail["since"] = now
+        client.publish(AVAIL_TOPIC, "online" if online else "offline", retain=True)
 
     # Ett topic, en melding - alle entitetene oppdateres samtidig.
     client.publish(STATE_TOPIC, json.dumps(state))
@@ -297,7 +326,9 @@ def main():
             print(f"Status: {stats['received']} mottatt, "
                   f"{stats['valid']} beregnet, "
                   f"{stats['incomplete']} ufullstendige, "
-                  f"{stats['invalid']} inkonsistente", flush=True)
+                  f"{stats['invalid']} inkonsistente, "
+                  f"tilstand: {'tilgjengelig' if avail['online'] else 'utilgjengelig'}",
+                  flush=True)
 
 
 if __name__ == "__main__":

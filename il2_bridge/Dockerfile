@@ -3,7 +3,7 @@
 ARG BUILD_FROM=ghcr.io/home-assistant/base:latest
 FROM ${BUILD_FROM}
 
-ARG BUILD_VERSION=1.2.0
+ARG BUILD_VERSION=1.3.0
 ARG BUILD_ARCH=aarch64
 
 RUN apk add --no-cache python3 py3-pip \
