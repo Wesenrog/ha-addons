@@ -1,5 +1,5 @@
 name: IL2 Bridge
-version: "1.1.0"
+version: "1.2.0"
 slug: il2_bridge
 description: Rekonstruerer strom i L2 fra Aidon 3P3W HAN-data
 url: "https://github.com/wesenrog/ha-addons"
@@ -25,6 +25,7 @@ options:
   field_i3: "I3"
   field_p: "P"
   field_q: "Q"
+  field_ts: "t"
   field_p_out: "PO"
   field_q_out: "QO"
 schema:
@@ -42,5 +43,6 @@ schema:
   field_i3: str
   field_p: str
   field_q: str
+  field_ts: str
   field_p_out: str
   field_q_out: str

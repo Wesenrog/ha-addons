@@ -1,5 +1,21 @@
 # Endringslogg
 
+## 1.2.0
+
+- Nytt felt meter_ts: tidsstempelet fra amsreader (feltet "t", konfigurerbart
+  via field_ts) sendes videre som ISO 8601.
+- Nytt felt last_valid_ts: absolutt tidspunkt for siste gyldige beregning.
+- To nye diagnostikk-entiteter med device_class timestamp - Home Assistant
+  viser dem som levende relativ tid ("for 2 minutter siden"), og alderen
+  fortsetter aa vokse selv om broen slutter aa publisere.
+- age_s beholdes, men er et oyeblikksbilde fra siste melding.
+
+## 1.1.1
+
+- Sensoren "Strom L2" barer hele state-meldingen som attributter, slik at
+  error, ts og age_s blir tilgjengelige i Home Assistant uten egne
+  entiteter - og et enkelt markdown-kort kan vise hele maleoyeblikket.
+
 ## 1.1.0
 
 - Publiserer hele maleoyeblikket som EN samlet JSON paa ett state-topic

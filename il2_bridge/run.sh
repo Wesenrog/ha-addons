@@ -41,6 +41,7 @@ export F_I1="$(bashio::config 'field_i1')"
 export F_I3="$(bashio::config 'field_i3')"
 export F_P="$(bashio::config 'field_p')"
 export F_Q="$(bashio::config 'field_q')"
+export F_TS="$(bashio::config 'field_ts')"
 export F_P_OUT="$(bashio::config 'field_p_out')"
 export F_Q_OUT="$(bashio::config 'field_q_out')"
 

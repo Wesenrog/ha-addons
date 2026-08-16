@@ -12,6 +12,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime, timezone
 
 import paho.mqtt.client as mqtt
 
@@ -47,6 +48,9 @@ FIELDS = {
     "Q": os.environ.get("F_Q", "Q"),
 }
 
+# Tidsstempel fra kilden. Amsreader legger unix-tid i "t" pa toppnivaa.
+FIELD_TS = os.environ.get("F_TS", "t")
+
 # Valgfrie eksportfelter. Mangler de, regnes eksporten som null.
 FIELDS_OUT = {
     "PO": os.environ.get("F_P_OUT", "PO"),
@@ -72,6 +76,8 @@ SENSORS = [
     ("q", "Reaktiv effekt", "q", "reactive_power", "var", False),
     ("i_l2_alt", "Strom L2 (forkastet losning)", "i_l2_alt", "current", "A", True),
     ("lead_deg", "Fasemargin", "lead_deg", None, "\u00b0", True),
+    ("meter_ts", "Maletidspunkt", "meter_ts", "timestamp", None, True),
+    ("valid_ts", "Sist gyldige beregning", "last_valid_ts", "timestamp", None, True),
 ]
 
 last_good = {"value": None, "alt": None, "lead": None, "t": 0.0}
@@ -86,6 +92,14 @@ stats = {
     "first_logged": False,
     "warned": False,
 }
+
+
+def to_iso(epoch):
+    """Unix-tid til ISO 8601 med tidssone - kravet for device_class timestamp."""
+    try:
+        return datetime.fromtimestamp(float(epoch), tz=timezone.utc).isoformat()
+    except (TypeError, ValueError, OSError, OverflowError):
+        return None
 
 
 def dig(payload, key):
@@ -107,15 +121,21 @@ def publish_discovery(client):
             "state_topic": STATE_TOPIC,
             "value_template": "{{ value_json.%s }}" % key,
             "availability_topic": AVAIL_TOPIC,
-            "state_class": "measurement",
             "device": DEVICE,
         }
+        if dev_class != "timestamp":
+            cfg["state_class"] = "measurement"
         if dev_class:
             cfg["device_class"] = dev_class
         if unit:
             cfg["unit_of_measurement"] = unit
         if diag:
             cfg["entity_category"] = "diagnostic"
+        if obj == "i_l2":
+            # Hovedsensoren barer hele state-meldingen som attributter,
+            # slik at ett markdown-kort kan vise alt - inkludert error,
+            # ts og age_s, som ikke har egne entiteter.
+            cfg["json_attributes_topic"] = STATE_TOPIC
         client.publish(f"homeassistant/sensor/{UID}/{obj}/config",
                        json.dumps(cfg), retain=True)
 
@@ -194,6 +214,7 @@ def on_message(client, userdata, msg):
         "p": round(p_net, 1),
         "q": round(q_net, 1),
         "ts": int(time.time()),
+        "meter_ts": to_iso(dig(payload, FIELD_TS)),
         "valid": False,
         "error": None,
     }
@@ -221,6 +242,7 @@ def on_message(client, userdata, msg):
     # forrige gyldige beregning naar konsistenssjekken slaar ut.
     age = time.time() - last_good["t"]
     state["age_s"] = round(age, 1)
+    state["last_valid_ts"] = to_iso(last_good["t"]) if last_good["t"] else None
     if last_good["value"] is None:
         state["i_l2"] = None
         state["i_l2_alt"] = None
