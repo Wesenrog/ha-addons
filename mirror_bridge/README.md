@@ -5,9 +5,9 @@ remote mirror needs no YAML and the Pi needs no restarts.
 
 **Status: in production.** It is the mirror - the statestream block, the
 dispatcher automations and the mirror's MQTT YAML have all been removed. As of
-version 0.3.1 it publishes 13 entities by label: three thermostats with their
-battery and temperature sensors, two override switches, a day/night flag and a
-fan-speed sensor.
+version 0.4.0 it publishes 19 entities by label: three thermostats with their
+battery and temperature sensors, two override switches, a day/night flag, a
+fan-speed sensor and the six lights in one room.
 
 ## Why it exists
 
