@@ -1,5 +1,15 @@
 # Endringslogg
 
+## 1.3.1
+
+- Republiserer availability ved hver MQTT-tilkobling, ikke bare ved oppstart.
+  Naar brokeren startes pa nytt, publiserer den vart "offline"-testament
+  retained. Siden 1.3.0 bare publiserer availability ved endring, sto den
+  cachede tilstanden fortsatt til "online" etter reconnect, saa ingenting ble
+  republisert og alle entitetene ble liggende utilgjengelige i Home Assistant
+  - mens tillegget selv rapporterte "tilstand: tilgjengelig" i loggen. Eneste
+  losning var a starte tillegget pa nytt for hand.
+
 ## 1.3.0
 
 - Logger naar entiteten gaar utilgjengelig og tilgjengelig igjen, med

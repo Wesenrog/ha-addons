@@ -189,6 +189,14 @@ def on_connect(client, userdata, flags, reason_code, properties=None):
         return
     print(f"Tilkoblet. Abonnerer paa {SRC_TOPIC}", flush=True)
     publish_discovery(client)
+    # Naar forbindelsen falt, publiserte brokeren vart "offline"-testament, og
+    # det ligger retained. Availability publiseres bare ved endring, saa den
+    # cachede tilstanden ville ellers holdt entitetene utilgjengelige for alltid
+    # etter en reconnect - selv om vi selv mener vi er tilgjengelige. Republiser
+    # derfor gjeldende tilstand ved hver tilkobling, ikke bare ved oppstart.
+    if avail["online"] is not None:
+        client.publish(AVAIL_TOPIC,
+                       "online" if avail["online"] else "offline", retain=True)
     client.subscribe(SRC_TOPIC)
 
 
