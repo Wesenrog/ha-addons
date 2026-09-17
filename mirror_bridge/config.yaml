@@ -1,0 +1,51 @@
+name: Mirror Bridge
+version: 0.3.1
+slug: mirror_bridge
+description: >-
+  Publishes label-selected entities to MQTT with discovery, so a remote Home
+  Assistant mirror needs no YAML and no restarts.
+url: https://github.com/wesenrog/ha-addons
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: services
+boot: auto
+
+# The Supervisor injects broker credentials for the mqtt service, and
+# homeassistant_api gives us SUPERVISOR_TOKEN for the websocket API. Between
+# them the add-on needs no configured secrets at all - nothing to store, nothing
+# to expire.
+homeassistant_api: true
+services:
+  - mqtt:need
+
+# Optional per-entity name/icon overrides live here, so they stay data rather
+# than core configuration.
+map:
+  - addon_config:rw
+
+options:
+  # Left empty, the Supervisor's injected mqtt service credentials are used.
+  # Set them when that is not usable - notably when the Mosquitto add-on's
+  # `logins` list defines a username that collides with the service account
+  # ("addons"), in which case the manual password wins in the broker's password
+  # file and the injected one is rejected.
+  mqtt_user: ""
+  mqtt_password: ""
+  label: mirror
+  label_rw: mirror-rw
+  base_topic: mirror
+  discovery_prefix: mirror/discovery
+  device_name: Pi mirror
+  log_level: info
+
+schema:
+  mqtt_user: str?
+  mqtt_password: password?
+  label: str
+  label_rw: str
+  base_topic: str
+  discovery_prefix: str
+  device_name: str
+  log_level: list(debug|info|warning|error)
