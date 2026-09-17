@@ -1,5 +1,5 @@
 name: Mirror Bridge
-version: 0.3.1
+version: 0.4.0
 slug: mirror_bridge
 description: >-
   Publishes label-selected entities to MQTT with discovery, so a remote Home

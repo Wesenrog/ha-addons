@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.0
+
+- **Lights are mirrored as lights when writable**, with on/off, brightness and
+  colour temperature. What a given light carries is decided per entity from its
+  `supported_color_modes`, so an on/off bulb gets no brightness slider and a
+  bulb without `color_temp` gets no temperature control. Colour (xy/hs) is
+  deliberately not mirrored. Colour temperature is published in kelvin
+  (`color_temp_kelvin: true`), matching the attribute the source reports, rather
+  than letting the MQTT platform convert to mireds. A read-only light stays a
+  sensor, because the MQTT light platform requires a command topic.
+- `Spec` gained `state_map` and `Command` gained `topic_key`, so a platform that
+  reads part of its state from its own topic - a thermostat's current
+  temperature, a light's brightness - declares that in `classes.py` instead of
+  in a branch in `bridge.py`. The climate special case in `_discovery` shrank to
+  the one genuinely odd thing about it: its `state_topic` is a mode topic.
+- `Command` also gained `min_value` / `max_value` for a range the entity does
+  not describe at all (brightness is 0-255 by definition, not by report) and
+  `as_int` for services that want a whole number. An attribute-derived bound
+  still wins over a fixed one.
+- On/off commands now take their domain from the command's own service instead
+  of always calling `homeassistant.turn_on`.
+
 ## 0.3.1
 
 - Dockerfile defaults `BUILD_FROM`, since Supervisor 2026.04.0+ no longer passes

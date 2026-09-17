@@ -34,10 +34,25 @@ attributes at publish time.
 | Mirror an entity | apply the `mirror` label |
 | Make it writable | also apply `mirror-rw` |
 | Stop mirroring it | remove the label |
-| Support a new *class* (covers, locks, fans) | extend `classes.py`, bump the version, update the add-on |
+| Support a new *class* (covers, locks) | extend `classes.py`, bump the version, update the add-on |
 
 `classes.py` is the only file that needs touching for a new class. Everything
 else is generic.
+
+### Classes it knows
+
+| Source domain | On the mirror | Writable form |
+|---|---|---|
+| `input_boolean`, `switch` | `binary_sensor` | `switch`, on/off |
+| `binary_sensor`, `sensor` | same | read-only |
+| `climate` | `climate` | hvac mode and target temperature |
+| `light` | `sensor` (brightness) | `light`: on/off, brightness, colour temperature |
+
+A light's writable form is decided per entity from its `supported_color_modes`:
+an on/off bulb gets no brightness slider, and one without `color_temp` gets no
+temperature control. Colour (xy/hs) is not mirrored - the mirror is for seeing
+and setting a room, not for picking colours. A read-only light stays a sensor
+because the MQTT light platform requires a command topic.
 
 ## Design notes worth keeping
 

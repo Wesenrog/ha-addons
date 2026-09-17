@@ -143,20 +143,19 @@ class Bridge:
                 "friendly_name", entity_id)
 
         if spec.component == "climate":
+            # The one platform that does not call the entity state its "state":
+            # for a thermostat that topic carries the hvac mode.
             payload["mode_state_topic"] = cfg.state_topic(entity_id)
-            payload["current_temperature_topic"] = cfg.attribute_topic(
-                entity_id, "current_temperature")
-            payload["temperature_state_topic"] = cfg.attribute_topic(
-                entity_id, "temperature")
-            payload["action_topic"] = cfg.attribute_topic(entity_id, "hvac_action")
         else:
             payload["state_topic"] = cfg.state_topic(entity_id)
 
-        for capability in spec.commands:
-            key = {"set": "command_topic",
-                   "mode": "mode_command_topic",
-                   "temperature": "temperature_command_topic"}[capability]
-            payload[key] = cfg.command_topic(entity_id, capability)
+        # Everything else a platform reads from its own topic - a thermostat's
+        # current temperature, a light's brightness - is declared in the class.
+        for key, attribute in spec.state_map.items():
+            payload[key] = cfg.attribute_topic(entity_id, attribute)
+
+        for capability, command in spec.commands.items():
+            payload[command.topic_key] = cfg.command_topic(entity_id, capability)
         return payload
 
     def _retract(self, entity_id):
@@ -220,12 +219,13 @@ class Bridge:
         # TODO(verify against the live system): confirm homeassistant.turn_on /
         # turn_off is the right generic for the onoff kind across the domains we
         # label, and that call_service accepts an empty service_data.
+        domain = command.service.split(".", 1)[0]
         if command.kind == "onoff":
             service = "turn_on" if value else "turn_off"
-            await self._ha.call_service("homeassistant", service,
+            await self._ha.call_service(domain, service,
                                         {"entity_id": entity_id}, {})
         else:
-            domain, service = command.service.split(".", 1)
+            service = command.service.split(".", 1)[1]
             await self._ha.call_service(domain, service, {"entity_id": entity_id},
                                         {command.data_field: value})
         _LOG.info("%s %s -> %r", entity_id, capability, value)
@@ -249,11 +249,13 @@ class Bridge:
                 value = float(payload)
             except ValueError:
                 return None
-            low = attributes.get(command.min_attr)
-            high = attributes.get(command.max_attr)
+            # An attribute wins over the fixed bound, so a device reporting its
+            # own range is still clamped to what it actually accepts.
+            low = attributes.get(command.min_attr, command.min_value)
+            high = attributes.get(command.max_attr, command.max_value)
             if low is not None:
                 value = max(value, float(low))
             if high is not None:
                 value = min(value, float(high))
-            return value
+            return int(round(value)) if command.as_int else value
         return None
