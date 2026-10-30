@@ -1,0 +1,36 @@
+configuration:
+  username:
+    name: Homely username
+    description: The email address you use in the Homely app.
+  password:
+    name: Homely password
+    description: The password you use in the Homely app.
+  home:
+    name: Home
+    description: Name of the Homely home to use, if your account has more than one. Leave empty to use the first.
+  poll_interval:
+    name: Full refresh interval (seconds)
+    description: How often to fetch all devices. Live changes arrive over the websocket, so this can be long. Homely rate limits frequent requests.
+  stale_after:
+    name: Stale after (seconds)
+    description: How long the live connection to Homely may be down before entities show as unavailable. Short drops within this time change nothing.
+  discovery_prefix:
+    name: MQTT discovery prefix
+    description: Home Assistant's MQTT discovery prefix. Only change this if you changed it in Home Assistant.
+  base_topic:
+    name: MQTT base topic
+    description: Topic prefix for the state messages.
+  log_level:
+    name: Log level
+  language:
+    name: Entity language
+    description: Language of the entity names, nb (Norwegian bokmål) or en (English). Entity ids do not depend on it.
+  mqtt_host:
+    name: MQTT host
+    description: Only needed if you don't use the Mosquitto broker add-on.
+  mqtt_port:
+    name: MQTT port
+  mqtt_username:
+    name: MQTT username
+  mqtt_password:
+    name: MQTT password

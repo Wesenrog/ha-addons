@@ -1,0 +1,19 @@
+# Exact pins, including transitive dependencies, so every build installs the
+# same code. All of these are pure-Python wheels (see Dockerfile).
+#
+# Direct dependencies: paho-mqtt, python-socketio[client], requests.
+# To update: install those in a clean Python 3.13 venv, then
+#   pip freeze --all | grep -vE '^(pip|setuptools|wheel)=='
+bidict==0.24.1
+certifi==2026.10.23
+charset-normalizer==3.5.2
+h11==0.16.0
+idna==3.20
+paho-mqtt==2.1.0
+python-engineio==4.15.1
+python-socketio==5.17.1
+requests==2.34.2
+simple-websocket==1.1.0
+urllib3==2.8.0
+websocket-client==1.9.2
+wsproto==1.3.2

@@ -1,0 +1,73 @@
+{
+  "locationId": "182bb447-8fa3-4fab-aa1a-5f01d15d6b59",
+  "gatewayserial": "02000001000109FD",
+  "name": "Testhjem",
+  "alarmState": "DISARMED",
+  "userRoleAtLocation": "ADMIN",
+  "devices": [
+    {
+      "id": "60566ab4-114b-44f9-b355-b08eae8e2bb8",
+      "name": "Hall motion",
+      "serialNumber": "0015BC001A016A18",
+      "location": "Floor 1 - Entrance",
+      "online": true,
+      "modelId": "e806ca73-4be0-4bd2-98cb-71f273b09812",
+      "modelName": "Motion Sensor Mini",
+      "features": {
+        "alarm": {"states": {
+          "alarm": {"value": false, "lastUpdated": "2022-03-07T10:17:06.109Z"},
+          "tamper": {"value": false, "lastUpdated": "2022-03-07T10:17:12.031Z"}}},
+        "temperature": {"states": {
+          "temperature": {"value": 20.3, "lastUpdated": "2022-03-07T10:16:23.730Z"}}},
+        "battery": {"states": {
+          "low": {"value": false, "lastUpdated": "2021-10-22T12:54:34.415Z"},
+          "defect": {"value": false, "lastUpdated": "2021-10-22T12:54:34.444Z"},
+          "voltage": {"value": 2.9, "lastUpdated": "2022-03-07T03:23:20.184Z"}}},
+        "diagnostic": {"states": {
+          "networklinkstrength": {"value": 87, "lastUpdated": "2022-03-07T10:17:13.992Z"},
+          "networklinkaddress": {"value": "0015BC002C102E91", "lastUpdated": "2022-02-21T12:01:35.472Z"}}}
+      }
+    },
+    {
+      "id": "93fc76e9-1a1f-4e63-8cf4-963f2e834eaf",
+      "name": "Bathroom floor",
+      "serialNumber": "000D6F000D8106CC",
+      "location": "",
+      "online": true,
+      "modelName": "ELKO Super TR",
+      "features": {
+        "thermostat": {"states": {
+          "LocalTemperature": {"value": 2380, "lastUpdated": "2022-03-09T13:12:12.871Z"},
+          "OccupiedHeatingSetpoint": {"value": 2800, "lastUpdated": "2022-03-04T13:57:03.957Z"},
+          "mf415": {"value": true, "lastUpdated": "2022-03-08T16:37:39.425Z"}}}
+      }
+    },
+    {
+      "id": "1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f",
+      "name": "HAN plug",
+      "serialNumber": "0015BC001B024D94",
+      "location": "Floor 1 - Entrance",
+      "online": false,
+      "modelName": "EMI Norwegian HAN",
+      "features": {
+        "metering": {"states": {
+          "summationdelivered": {"value": 769750, "lastUpdated": "2022-03-09T13:12:12.871Z"},
+          "summationreceived": {"value": 0, "lastUpdated": "2022-03-09T13:12:12.871Z"},
+          "demand": {"value": 104, "lastUpdated": "2022-03-09T13:12:12.871Z"},
+          "check": {"value": false, "lastUpdated": "2022-03-09T13:12:12.871Z"}}}
+      }
+    },
+    {
+      "id": "aa6d0206-bfcc-4c8b-83f1-c23d7270fe00",
+      "name": "Front door",
+      "serialNumber": "0015BC001B02AAAA",
+      "location": "Floor 1 - Hallway",
+      "online": true,
+      "modelName": "Window Sensor",
+      "features": {
+        "alarm": {"states": {"alarm": {"value": true, "lastUpdated": "2022-03-09T13:12:12.871Z"}}},
+        "battery": {"states": {"low": {"value": true, "lastUpdated": "2022-03-09T13:12:12.871Z"}}}
+      }
+    }
+  ]
+}

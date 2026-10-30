@@ -1,0 +1,152 @@
+{
+ "homeassistant/binary_sensor/homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59/armed/config": {
+  "unique_id": "homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59_armed",
+  "name": "Armed",
+  "model": "Alarm system"
+ },
+ "homeassistant/binary_sensor/homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59/battery_problem/config": {
+  "unique_id": "homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59_battery_problem",
+  "name": "Battery problem",
+  "model": "Alarm system"
+ },
+ "homeassistant/binary_sensor/homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59/live_updates/config": {
+  "unique_id": "homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59_live_updates",
+  "name": "Live updates",
+  "model": "Alarm system"
+ },
+ "homeassistant/binary_sensor/homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59/tamper/config": {
+  "unique_id": "homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59_tamper",
+  "name": "Tamper",
+  "model": "Alarm system"
+ },
+ "homeassistant/binary_sensor/homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59/triggered/config": {
+  "unique_id": "homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59_triggered",
+  "name": "Triggered",
+  "model": "Alarm system"
+ },
+ "homeassistant/binary_sensor/homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f/metering_check/config": {
+  "unique_id": "homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f_metering_check",
+  "name": "Metering check",
+  "model": "EMI Norwegian HAN"
+ },
+ "homeassistant/binary_sensor/homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f/online/config": {
+  "unique_id": "homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f_online",
+  "name": "Online",
+  "model": "EMI Norwegian HAN"
+ },
+ "homeassistant/binary_sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/alarm_alarm/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_alarm_alarm",
+  "name": "Motion",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/binary_sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/alarm_tamper/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_alarm_tamper",
+  "name": "Tamper",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/binary_sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/battery_defect/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_battery_defect",
+  "name": "Battery defect",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/binary_sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/battery_low/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_battery_low",
+  "name": "Battery low",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/binary_sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/online/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_online",
+  "name": "Online",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/binary_sensor/homely_93fc76e9-1a1f-4e63-8cf4-963f2e834eaf/online/config": {
+  "unique_id": "homely_93fc76e9-1a1f-4e63-8cf4-963f2e834eaf_online",
+  "name": "Online",
+  "model": "ELKO Super TR"
+ },
+ "homeassistant/binary_sensor/homely_aa6d0206-bfcc-4c8b-83f1-c23d7270fe00/alarm_alarm/config": {
+  "unique_id": "homely_aa6d0206-bfcc-4c8b-83f1-c23d7270fe00_alarm_alarm",
+  "name": "Contact",
+  "model": "Window Sensor"
+ },
+ "homeassistant/binary_sensor/homely_aa6d0206-bfcc-4c8b-83f1-c23d7270fe00/battery_low/config": {
+  "unique_id": "homely_aa6d0206-bfcc-4c8b-83f1-c23d7270fe00_battery_low",
+  "name": "Battery low",
+  "model": "Window Sensor"
+ },
+ "homeassistant/binary_sensor/homely_aa6d0206-bfcc-4c8b-83f1-c23d7270fe00/online/config": {
+  "unique_id": "homely_aa6d0206-bfcc-4c8b-83f1-c23d7270fe00_online",
+  "name": "Online",
+  "model": "Window Sensor"
+ },
+ "homeassistant/sensor/homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59/alarm/config": {
+  "unique_id": "homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59_alarm",
+  "name": "Alarm",
+  "model": "Alarm system"
+ },
+ "homeassistant/sensor/homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59/devices_offline/config": {
+  "unique_id": "homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59_devices_offline",
+  "name": "Offline devices",
+  "model": "Alarm system"
+ },
+ "homeassistant/sensor/homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59/last_poll/config": {
+  "unique_id": "homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59_last_poll",
+  "name": "Last poll",
+  "model": "Alarm system"
+ },
+ "homeassistant/sensor/homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59/last_poll_status/config": {
+  "unique_id": "homely_182bb447-8fa3-4fab-aa1a-5f01d15d6b59_last_poll_status",
+  "name": "Last poll status",
+  "model": "Alarm system"
+ },
+ "homeassistant/sensor/homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f/metering_demand/config": {
+  "unique_id": "homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f_metering_demand",
+  "name": "Power",
+  "model": "EMI Norwegian HAN"
+ },
+ "homeassistant/sensor/homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f/metering_summationdelivered/config": {
+  "unique_id": "homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f_metering_summationdelivered",
+  "name": "Energy imported",
+  "model": "EMI Norwegian HAN"
+ },
+ "homeassistant/sensor/homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f/metering_summationreceived/config": {
+  "unique_id": "homely_1d6d0206-bfcc-4c8b-83f1-c23d7270fe9f_metering_summationreceived",
+  "name": "Energy exported",
+  "model": "EMI Norwegian HAN"
+ },
+ "homeassistant/sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/battery_voltage/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_battery_voltage",
+  "name": "Battery voltage",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/diagnostic_networklinkaddress/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_diagnostic_networklinkaddress",
+  "name": "Parent address",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/diagnostic_networklinkstrength/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_diagnostic_networklinkstrength",
+  "name": "Link quality",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/humidity_humidity/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_humidity_humidity",
+  "name": "Humidity",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/sensor/homely_60566ab4-114b-44f9-b355-b08eae8e2bb8/temperature_temperature/config": {
+  "unique_id": "homely_60566ab4-114b-44f9-b355-b08eae8e2bb8_temperature_temperature",
+  "name": "Temperature",
+  "model": "Motion Sensor Mini"
+ },
+ "homeassistant/sensor/homely_93fc76e9-1a1f-4e63-8cf4-963f2e834eaf/thermostat_localtemperature/config": {
+  "unique_id": "homely_93fc76e9-1a1f-4e63-8cf4-963f2e834eaf_thermostat_localtemperature",
+  "name": "Temperature",
+  "model": "ELKO Super TR"
+ },
+ "homeassistant/sensor/homely_93fc76e9-1a1f-4e63-8cf4-963f2e834eaf/thermostat_occupiedheatingsetpoint/config": {
+  "unique_id": "homely_93fc76e9-1a1f-4e63-8cf4-963f2e834eaf_thermostat_occupiedheatingsetpoint",
+  "name": "Heating setpoint",
+  "model": "ELKO Super TR"
+ }
+}

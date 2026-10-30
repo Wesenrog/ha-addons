@@ -35,3 +35,13 @@ har `mirror-rw` avvises.
 
 Stotter binary_sensor, sensor, switch, climate og light. Ny enhetsklasse legges
 til i `classes.py`.
+
+## Homely
+
+Henter alarmen og sensorene fra et Homely-alarmsystem (Homelys API, bare
+lesing) og publiserer dem som MQTT Discovery-entiteter: alarmstatus,
+dør/vindu-kontakter, bevegelse, røyk/varme, lås, temperatur, batteri og
+tilkobling. Hendelser kommer i sanntid over websocket, med jevnlig henting som
+reserve. Data som ikke kan stoles på (brutt forbindelse, enhet frakoblet) vises
+som utilgjengelig, ikke som siste verdi. Navn på norsk, faste entitets-id-er.
+Se `homely/DOCS.md`.

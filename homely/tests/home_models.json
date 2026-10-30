@@ -1,0 +1,797 @@
+{
+ "locationId": "3f98e277-4cbd-47ad-9c90-a9587403e430",
+ "gatewayserial": "02000001CB5C7427",
+ "name": "Testhjem",
+ "alarmState": "DISARMED",
+ "userRoleAtLocation": "ADMIN",
+ "devices": [
+  {
+   "id": "6513270e-269e-4d37-b2a7-4de452e6b438",
+   "name": "Kontakt A",
+   "serialNumber": "0015BC00A6A3A450",
+   "location": "Floor 1 - Room 1",
+   "online": true,
+   "modelId": "4b62c7a0-68a9-4c17-ab36-07f270b77386",
+   "modelName": "Entry Sensor",
+   "features": {
+    "alarm": {
+     "states": {
+      "alarm": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "tamper": {
+       "value": null,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 3,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 44,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC000C5C7FD0",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "5d9dc9f8-1818-4811-892f-902bd23f0824",
+   "name": "Vindu A",
+   "serialNumber": "0015BC009531985D",
+   "location": "Floor 1 - Room 2",
+   "online": true,
+   "modelId": "9b765375-e3f4-4627-b73c-b4143ce86c2c",
+   "modelName": "Alarm Entry Sensor 2",
+   "features": {
+    "alarm": {
+     "states": {
+      "alarm": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "tamper": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "temperature": {
+     "states": {
+      "temperature": {
+       "value": 20.5,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 2.9,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 98,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC000ED90475",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "1600a35a-0999-40d8-b6f6-75cc81e74ef5",
+   "name": "Vindu B",
+   "serialNumber": "0015BC006F03675A",
+   "location": "Floor 1 - Room 3",
+   "online": true,
+   "modelId": "9b765375-e3f4-4627-b73c-b4143ce86c2c",
+   "modelName": "Alarm Entry Sensor 2",
+   "features": {
+    "alarm": {
+     "states": {
+      "alarm": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "tamper": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "temperature": {
+     "states": {
+      "temperature": {
+       "value": 20.5,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 2.9,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 44,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC006B0D549B",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "6cad4a26-8d11-4ece-9738-f7d93d9c1724",
+   "name": "Bevegelse A",
+   "serialNumber": "0015BC000F21DDB6",
+   "location": "Floor 1 - Room 4",
+   "online": true,
+   "modelId": "17ddbcb4-8c00-4bc3-b06f-d20f51c0fe52",
+   "modelName": "Alarm Motion Sensor 2",
+   "features": {
+    "setup": {
+     "states": {
+      "appledenable": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "errledenable": {
+       "value": true,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "alarm": {
+     "states": {
+      "alarm": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "tamper": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "sensitivitylevel": {
+       "value": 4,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "temperature": {
+     "states": {
+      "temperature": {
+       "value": 19.3,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "defect": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 2.8,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 76,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC00D3AC94AF",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "a170b338-3926-4059-b28c-105d1fb17c23",
+   "name": "Bevegelse B",
+   "serialNumber": "0015BC00A09F76B5",
+   "location": "Floor 1 - Room 5",
+   "online": true,
+   "modelId": "17ddbcb4-8c00-4bc3-b06f-d20f51c0fe52",
+   "modelName": "Alarm Motion Sensor 2",
+   "features": {
+    "setup": {
+     "states": {
+      "appledenable": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "errledenable": {
+       "value": true,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "alarm": {
+     "states": {
+      "alarm": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "tamper": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "sensitivitylevel": {
+       "value": 4,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "temperature": {
+     "states": {
+      "temperature": {
+       "value": 19.3,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "defect": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 2.8,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 100,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC00953F48F1",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "658cda14-95e6-4af5-93bd-04cf0fd630f1",
+   "name": "Bevegelse C",
+   "serialNumber": "0015BC000CB1E29C",
+   "location": "Floor 1 - Room 6",
+   "online": true,
+   "modelId": "17ddbcb4-8c00-4bc3-b06f-d20f51c0fe52",
+   "modelName": "Alarm Motion Sensor 2",
+   "features": {
+    "setup": {
+     "states": {
+      "appledenable": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "errledenable": {
+       "value": true,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "alarm": {
+     "states": {
+      "alarm": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "tamper": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "sensitivitylevel": {
+       "value": 4,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "temperature": {
+     "states": {
+      "temperature": {
+       "value": 19.3,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "defect": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 2.8,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 54,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC00F9EBDACC",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "2217bead-dbc4-46cb-8e81-973e0becd7b0",
+   "name": "Røykvarsler A",
+   "serialNumber": "0015BC004A23D596",
+   "location": "Floor 1 - Room 7",
+   "online": true,
+   "modelId": "15e64f49-fdbc-4cd6-9912-e2a6e838d44f",
+   "modelName": "Intelligent Smoke Alarm",
+   "features": {
+    "alarm": {
+     "states": {
+      "fire": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "temperature": {
+     "states": {
+      "temperature": {
+       "value": 13.3,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 2.9,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 49,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC006B4CB242",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "4ef8aa38-9227-4658-9e27-a1c08a6a63ec",
+   "name": "Røykvarsler B",
+   "serialNumber": "0015BC008F6D0558",
+   "location": "Floor 1 - Room 8",
+   "online": true,
+   "modelId": "15e64f49-fdbc-4cd6-9912-e2a6e838d44f",
+   "modelName": "Intelligent Smoke Alarm",
+   "features": {
+    "alarm": {
+     "states": {
+      "fire": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "temperature": {
+     "states": {
+      "temperature": {
+       "value": 13.3,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 2.9,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 83,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC00D0EDA82F",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "923a7369-94e3-4f91-9a61-dbe22e44158b",
+   "name": "Røykvarsler C",
+   "serialNumber": "0015BC00A38FD547",
+   "location": "Floor 1 - Room 9",
+   "online": true,
+   "modelId": "15e64f49-fdbc-4cd6-9912-e2a6e838d44f",
+   "modelName": "Intelligent Smoke Alarm",
+   "features": {
+    "alarm": {
+     "states": {
+      "fire": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "temperature": {
+     "states": {
+      "temperature": {
+       "value": 13.3,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 2.9,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 63,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC00301850C5",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "1012f037-b64c-4422-8c38-fb2918f135d2",
+   "name": "Varmevarsler",
+   "serialNumber": "0015BC00907A70C3",
+   "location": "Floor 1 - Room 10",
+   "online": true,
+   "modelId": "ad923ba3-2b72-45e0-a9d7-91808a76f2ed",
+   "modelName": "Intelligent Heat Alarm",
+   "features": {
+    "alarm": {
+     "states": {
+      "fire": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "temperature": {
+     "states": {
+      "temperature": {
+       "value": 23.1,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "battery": {
+     "states": {
+      "low": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "voltage": {
+       "value": 3,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "diagnostic": {
+     "states": {
+      "networklinkstrength": {
+       "value": 79,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "networklinkaddress": {
+       "value": "0015BC000F4205B4",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "881ed162-ae2e-4154-bf15-052434b9b5df",
+   "name": "Lås A",
+   "serialNumber": "0015BC006D76B07E",
+   "location": "Floor 1 - Room 11",
+   "online": true,
+   "modelId": "c57e1f1d-5e34-4bbb-857f-1be3183b811b",
+   "modelName": "Yale Doorman L3",
+   "features": {
+    "lock": {
+     "states": {
+      "state": {
+       "value": true,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "autorelocktime": {
+       "value": 0,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "soundvolume": {
+       "value": 2,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "language": {
+       "value": "en",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    },
+    "report": {
+     "states": {
+      "event": {
+       "value": "DOORLOCK_AUTOLOCKED",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "added": {
+       "value": null,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "deleted": {
+       "value": null,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "unknowncard": {
+       "value": null,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "errorcode": {
+       "value": "Success",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "locked": {
+       "value": true,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "Broken": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "doorclosed": {
+       "value": true,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "autolock": {
+       "value": true,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "lowbat": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "securesensor": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "lockmodel": {
+       "value": "Doorman L3",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "partofalarm": {
+       "value": true,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "95e761d1-7731-4f10-906b-f2efc6f87718",
+   "name": "Gulvvarme",
+   "serialNumber": "0015BC00EC66A787",
+   "location": "Floor 1 - Room 12",
+   "online": true,
+   "modelId": "72bb9e84-5bd3-4900-8b2e-0fe706299bf4",
+   "modelName": "ELKO Super TR",
+   "features": {
+    "thermostat": {
+     "states": {
+      "LocalTemperature": {
+       "value": 1850,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "AbsMinHeatSetpointLimit": {
+       "value": 500,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "AbsMaxHeatSetpointLimit": {
+       "value": 4000,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "OccupiedCoolingSetpoint": {
+       "value": 2600,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "OccupiedHeatingSetpoint": {
+       "value": 2200,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "ControlSequenceOfOperation": {
+       "value": 2,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "SystemMode": {
+       "value": 1,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf415": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf413": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf412": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf411": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf406": {
+       "value": true,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf419": {
+       "value": 0,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf418": {
+       "value": 10,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf417": {
+       "value": 0,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf416": {
+       "value": "00000000000000",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf414": {
+       "value": 28,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf409": {
+       "value": 2220,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf408": {
+       "value": 140,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf407": {
+       "value": null,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf405": {
+       "value": false,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf404": {
+       "value": 15,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf403": {
+       "value": "01",
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf402": {
+       "value": null,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      },
+      "mf401": {
+       "value": 2000,
+       "lastUpdated": "2026-01-01T00:00:00.000Z"
+      }
+     }
+    }
+   }
+  }
+ ]
+}
