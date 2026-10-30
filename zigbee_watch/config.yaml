@@ -1,0 +1,50 @@
+name: Zigbee Watch
+version: 0.1.0
+slug: zigbee_watch
+description: >-
+  Keeps a history of the Zigbee mesh from Zigbee2MQTT - inventory, link
+  quality, availability, route errors and a nightly network map - and reports
+  when it changes or degrades.
+url: https://github.com/wesenrog/ha-addons
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: services
+boot: auto
+
+# Broker credentials come from the Supervisor's mqtt service; nothing secret is
+# stored in the options.
+services:
+  - mqtt:need
+
+# The database lives in /share/zigbee_watch/, where it can be copied for
+# analysis.
+map:
+  - share:rw
+
+options:
+  z2m_base_topic: zigbee2mqtt
+  scan_time: "02:15"
+  scan_timeout_min: 15
+  retention_days: 400
+  lqi_drop: 25
+  error_min_count: 10
+  error_factor: 4
+  error_baseline_days: 14
+  timeout_mains_min: 60
+  timeout_battery_min: 1500
+  log_level: info
+
+schema:
+  z2m_base_topic: str
+  scan_time: match(^([01][0-9]|2[0-3]):[0-5][0-9]$)
+  scan_timeout_min: int(1,120)
+  retention_days: int(30,3650)
+  lqi_drop: int(1,255)
+  error_min_count: int(1,)
+  error_factor: float(1,)
+  error_baseline_days: int(3,60)
+  timeout_mains_min: int(1,)
+  timeout_battery_min: int(1,)
+  log_level: list(debug|info|warning|error)

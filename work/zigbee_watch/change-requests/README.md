@@ -5,4 +5,4 @@ open ones in number order (see [CLAUDE.md](../../../CLAUDE.md)).
 
 | # | Request | Status |
 |---|---|---|
-| 1 | [Review of the plan](01-plan-review.md) | open |
+| 1 | [Review of the plan](01-plan-review.md) | done 0.1.0 |

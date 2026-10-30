@@ -35,3 +35,15 @@ har `mirror-rw` avvises.
 
 Stotter binary_sensor, sensor, switch, climate og light. Ny enhetsklasse legges
 til i `classes.py`.
+
+## Zigbee Watch
+
+Forer historikk over Zigbee-nettet fra Zigbee2MQTT - inventar, linkkvalitet,
+tilgjengelighet, rutefeil fra loggen og et nettverkskart hver natt - og legger
+endringer og forverring i en liste med funn: ny forelder, fallende
+linkkvalitet, feil over enhetens eget normalnivaa, og enheter som ikke er hort.
+
+Bare observator: det eneste den sender til Zigbee2MQTT er foresporselen om
+nettverkskart om natten. Historikken ligger i SQLite under
+`/share/zigbee_watch/`, og `python -m zigbee_watch.report` viser den per enhet
+uten SQL.
