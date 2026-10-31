@@ -26,7 +26,7 @@ class Command:
     """
     service: str                    # "climate.set_temperature"
     data_field: str                 # "temperature"
-    kind: str                       # "onoff" | "number" | "enum"
+    kind: str                       # "onoff" | "number" | "enum" | "press" | "datetime"
     topic_key: str = "command_topic"  # discovery field carrying this topic
     enum_attr: str | None = None    # attribute listing the allowed values
     min_attr: str | None = None     # attribute holding the lower bound
@@ -48,6 +48,14 @@ class Spec:
 
 
 ONOFF = Command(service="homeassistant.turn_on", data_field="", kind="onoff")
+
+# (has_date, has_time) -> the set_datetime field and the text the mirror accepts.
+# Seconds are optional on the way in; the helper reports them.
+DATETIME_FORMS = {
+    (True, True): ("datetime", r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$"),
+    (True, False): ("date", r"^\d{4}-\d{2}-\d{2}$"),
+    (False, True): ("time", r"^\d{2}:\d{2}(:\d{2})?$"),
+}
 
 
 def _carry(attrs, *names):
@@ -121,6 +129,31 @@ def describe(entity_id: str, state: dict, writable: bool) -> Spec | None:
                     },
                     commands=commands)
 
+    # --- buttons -------------------------------------------------------------
+    # Only a writable button is mirrored: its state is the time it was last
+    # pressed, which nobody reads, and a button you cannot press is nothing.
+    if domain == "button":
+        if not writable:
+            return None
+        return Spec(component="button", config={**common, "payload_press": "PRESS"},
+                    commands={"press": Command(service="button.press", data_field="",
+                                               kind="press")})
+
+    # --- date and time helpers -----------------------------------------------
+    # The MQTT platforms have no date or time entity, so a writable one is a
+    # text entity held to the helper's own format by a pattern, and checked
+    # again on the way in. The state is the helper's own text
+    # ("2026-10-25 18:45:00"), which already matches.
+    if domain == "input_datetime":
+        if not writable:
+            return Spec(component="sensor", config=common)
+        has_date, has_time = attrs.get("has_date", True), attrs.get("has_time", True)
+        field_name, pattern = DATETIME_FORMS[(bool(has_date), bool(has_time))]
+        return Spec(component="text",
+                    config={**common, "pattern": pattern, "min": 5, "max": 19},
+                    commands={"set": Command(service="input_datetime.set_datetime",
+                                             data_field=field_name, kind="datetime")})
+
     # --- lights --------------------------------------------------------------
     # A read-only light stays a sensor: the MQTT light platform requires a
     # command topic, so there is no such thing as a light you cannot switch.
@@ -181,4 +214,6 @@ ALLOWED = {
     "switch": {"set"},
     "climate": {"mode", "temperature"},
     "light": {"set", "brightness", "color_temp"},
+    "button": {"press"},
+    "text": {"set"},
 }

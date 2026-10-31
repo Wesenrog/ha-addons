@@ -6,7 +6,7 @@ writable because it carries the writable label. Nothing the mirror sends can
 widen that, because every command is checked against the current membership set
 before a service is ever called.
 """
-import json, logging
+import datetime, json, logging
 
 from . import classes
 
@@ -146,7 +146,8 @@ class Bridge:
             # The one platform that does not call the entity state its "state":
             # for a thermostat that topic carries the hvac mode.
             payload["mode_state_topic"] = cfg.state_topic(entity_id)
-        else:
+        elif spec.component != "button":
+            # A button has no state on the MQTT platform.
             payload["state_topic"] = cfg.state_topic(entity_id)
 
         # Everything else a platform reads from its own topic - a thermostat's
@@ -224,6 +225,9 @@ class Bridge:
             service = "turn_on" if value else "turn_off"
             await self._ha.call_service(domain, service,
                                         {"entity_id": entity_id}, {})
+        elif command.kind == "press":
+            await self._ha.call_service(domain, command.service.split(".", 1)[1],
+                                        {"entity_id": entity_id}, {})
         else:
             service = command.service.split(".", 1)[1]
             await self._ha.call_service(domain, service, {"entity_id": entity_id},
@@ -258,4 +262,28 @@ class Bridge:
             if high is not None:
                 value = min(value, float(high))
             return int(round(value)) if command.as_int else value
+        if command.kind == "press":
+            return True if payload.strip() == "PRESS" else None
+        if command.kind == "datetime":
+            return _datetime_value(command.data_field, payload.strip())
         return None
+
+
+# set_datetime's field -> the formats accepted, and the one sent on.
+_DATETIME_IN = {
+    "datetime": (("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M:%S"),
+    "date": (("%Y-%m-%d",), "%Y-%m-%d"),
+    "time": (("%H:%M:%S", "%H:%M"), "%H:%M:%S"),
+}
+
+
+def _datetime_value(field_name, text):
+    """A real date and time in the helper's form, or None. The pattern on the
+    mirror is a hint to its UI; this is the check."""
+    accepted, out = _DATETIME_IN[field_name]
+    for fmt in accepted:
+        try:
+            return datetime.datetime.strptime(text, fmt).strftime(out)
+        except ValueError:
+            continue
+    return None

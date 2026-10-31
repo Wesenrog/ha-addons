@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0
+
+- **Buttons** are mirrored when writable, as MQTT buttons whose press calls
+  `button.press` on the source. A read-only button is not mirrored: its state
+  is only the time it was last pressed.
+- **`input_datetime` helpers** are mirrored as text entities when writable,
+  held to the helper's own format by a pattern (`YYYY-MM-DD HH:MM`, seconds
+  optional; a date-only or time-only helper takes just that part). A command is
+  parsed as a real date and time before `input_datetime.set_datetime` is
+  called, so 2026-02-30 is refused. Read-only, a helper is a sensor.
+- Tests for both, runnable with pytest or `python3 tests/test_classes.py`.
+
 ## 0.4.0
 
 - **Lights are mirrored as lights when writable**, with on/off, brightness and
