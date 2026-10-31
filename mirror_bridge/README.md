@@ -47,6 +47,8 @@ else is generic.
 | `binary_sensor`, `sensor` | same | read-only |
 | `climate` | `climate` | hvac mode and target temperature |
 | `light` | `sensor` (brightness) | `light`: on/off, brightness, colour temperature |
+| `button` | not mirrored | `button`, press |
+| `input_datetime` | `sensor` | `text` in the helper's format, checked as a real date and time |
 
 A light's writable form is decided per entity from its `supported_color_modes`:
 an on/off bulb gets no brightness slider, and one without `color_temp` gets no
