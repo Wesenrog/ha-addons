@@ -33,8 +33,8 @@ mot entitetens egne attributter - et settpunkt klippes til grensene apparatet
 selv oppgir - og medlemskapet er autorisasjonen: en kommando mot noe som ikke
 har `mirror-rw` avvises.
 
-Stotter binary_sensor, sensor, switch, climate og light. Ny enhetsklasse legges
-til i `classes.py`.
+Stotter binary_sensor, sensor, switch, climate, light (med farge og effekter),
+button, input_datetime og scene. Ny enhetsklasse legges til i `classes.py`.
 
 ## Zigbee Watch
 
@@ -47,3 +47,13 @@ Bare observator: det eneste den sender til Zigbee2MQTT er foresporselen om
 nettverkskart om natten. Historikken ligger i SQLite under
 `/share/zigbee_watch/`, og `python -m zigbee_watch.report` viser den per enhet
 uten SQL.
+
+## Homely
+
+Henter alarmen og sensorene fra et Homely-alarmsystem (Homelys API, bare
+lesing) og publiserer dem som MQTT Discovery-entiteter: alarmstatus,
+dør/vindu-kontakter, bevegelse, røyk/varme, lås, temperatur, batteri og
+tilkobling. Hendelser kommer i sanntid over websocket, med jevnlig henting som
+reserve. Data som ikke kan stoles på (brutt forbindelse, enhet frakoblet) vises
+som utilgjengelig, ikke som siste verdi. Navn på norsk, faste entitets-id-er.
+Se `homely/DOCS.md`.

@@ -6,7 +6,7 @@ writable because it carries the writable label. Nothing the mirror sends can
 widen that, because every command is checked against the current membership set
 before a service is ever called.
 """
-import json, logging
+import datetime, json, logging
 
 from . import classes
 
@@ -105,7 +105,10 @@ class Bridge:
         for name in spec.attributes:
             value = attributes.get(name)
             if value is not None:
-                # Plain text, not JSON: see the note in classes.py.
+                # Plain text, not JSON: see the note in classes.py. A pair - a
+                # light's xy colour - goes as "x,y", the MQTT light's own form.
+                if isinstance(value, (list, tuple)):
+                    value = ",".join(str(v) for v in value)
                 self._broker.publish(cfg.attribute_topic(entity_id, name), str(value))
 
     def _discovery(self, entity_id, state, spec):
@@ -146,7 +149,8 @@ class Bridge:
             # The one platform that does not call the entity state its "state":
             # for a thermostat that topic carries the hvac mode.
             payload["mode_state_topic"] = cfg.state_topic(entity_id)
-        else:
+        elif spec.component not in ("button", "scene"):
+            # A button and a scene have no state on the MQTT platform.
             payload["state_topic"] = cfg.state_topic(entity_id)
 
         # Everything else a platform reads from its own topic - a thermostat's
@@ -224,6 +228,9 @@ class Bridge:
             service = "turn_on" if value else "turn_off"
             await self._ha.call_service(domain, service,
                                         {"entity_id": entity_id}, {})
+        elif command.kind == "press":
+            await self._ha.call_service(domain, command.service.split(".", 1)[1],
+                                        {"entity_id": entity_id}, {})
         else:
             service = command.service.split(".", 1)[1]
             await self._ha.call_service(domain, service, {"entity_id": entity_id},
@@ -258,4 +265,42 @@ class Bridge:
             if high is not None:
                 value = min(value, float(high))
             return int(round(value)) if command.as_int else value
+        if command.kind == "press":
+            return True if payload.strip() == "PRESS" else None
+        if command.kind == "datetime":
+            return _datetime_value(command.data_field, payload.strip())
+        if command.kind == "xy":
+            return _xy_value(payload)
         return None
+
+
+# set_datetime's field -> the formats accepted, and the one sent on.
+_DATETIME_IN = {
+    "datetime": (("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M:%S"),
+    "date": (("%Y-%m-%d",), "%Y-%m-%d"),
+    "time": (("%H:%M:%S", "%H:%M"), "%H:%M:%S"),
+}
+
+
+def _datetime_value(field_name, text):
+    """A real date and time in the helper's form, or None. The pattern on the
+    mirror is a hint to its UI; this is the check."""
+    accepted, out = _DATETIME_IN[field_name]
+    for fmt in accepted:
+        try:
+            return datetime.datetime.strptime(text, fmt).strftime(out)
+        except ValueError:
+            continue
+    return None
+
+
+def _xy_value(text):
+    """"x,y" -> [x, y], both in the CIE chromaticity range 0-1, or None."""
+    parts = text.split(",")
+    if len(parts) != 2:
+        return None
+    try:
+        xy = [float(p) for p in parts]
+    except ValueError:
+        return None
+    return xy if all(0.0 <= v <= 1.0 for v in xy) else None

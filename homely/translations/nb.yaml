@@ -1,0 +1,36 @@
+configuration:
+  username:
+    name: Homely-brukernavn
+    description: E-postadressen du bruker i Homely-appen.
+  password:
+    name: Homely-passord
+    description: Passordet du bruker i Homely-appen.
+  home:
+    name: Hjem
+    description: Navnet på Homely-hjemmet som skal brukes, hvis kontoen har flere. La stå tomt for å bruke det første.
+  poll_interval:
+    name: Intervall for full henting (sekunder)
+    description: Hvor ofte alle enheter hentes. Endringer kommer fortløpende over websocket, så dette kan være lenge. Homely begrenser hyppige forespørsler.
+  stale_after:
+    name: Utdatert etter (sekunder)
+    description: Hvor lenge direkteforbindelsen til Homely kan være nede før entitetene vises som utilgjengelige. Korte brudd innenfor denne tiden endrer ingenting.
+  discovery_prefix:
+    name: MQTT discovery-prefiks
+    description: Home Assistants prefiks for MQTT discovery. Endre bare hvis du har endret det i Home Assistant.
+  base_topic:
+    name: MQTT basis-topic
+    description: Prefiks for topicene med tilstand.
+  log_level:
+    name: Loggnivå
+  language:
+    name: Språk på entiteter
+    description: Språk på entitetsnavnene, nb (norsk bokmål) eller en (engelsk). Entitets-ID-ene avhenger ikke av dette.
+  mqtt_host:
+    name: MQTT-vert
+    description: Trengs bare hvis du ikke bruker Mosquitto broker-tillegget.
+  mqtt_port:
+    name: MQTT-port
+  mqtt_username:
+    name: MQTT-brukernavn
+  mqtt_password:
+    name: MQTT-passord

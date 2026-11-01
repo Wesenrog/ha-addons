@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.6.0
+
+- **Scenes** are mirrored when writable, as MQTT scenes whose activation
+  calls `scene.turn_on` on the source. A read-only scene is not mirrored.
+- **Light colour**: a colour light (xy, hs or rgb) gets an xy colour command
+  and state, `"x,y"` on the wire, checked as two values in 0-1 before
+  `light.turn_on` is called with `xy_color`. The attribute among colour
+  temperature and colour that matches the source's `color_mode` is published
+  last, since the MQTT light takes its mode from the last it heard. This
+  reverses 0.4.0's choice not to mirror colour.
+- **Light effects**: a light with an `effect_list` gets it on the mirror, and
+  an effect command accepted only if the source lists it.
+- An attribute that is a list or tuple is published as comma-separated text.
+
+## 0.5.0
+
+- **Buttons** are mirrored when writable, as MQTT buttons whose press calls
+  `button.press` on the source. A read-only button is not mirrored: its state
+  is only the time it was last pressed.
+- **`input_datetime` helpers** are mirrored as text entities when writable,
+  held to the helper's own format by a pattern (`YYYY-MM-DD HH:MM`, seconds
+  optional; a date-only or time-only helper takes just that part). A command is
+  parsed as a real date and time before `input_datetime.set_datetime` is
+  called, so 2026-02-30 is refused. Read-only, a helper is a sensor.
+- Tests for both, runnable with pytest or `python3 tests/test_classes.py`.
+
 ## 0.4.0
 
 - **Lights are mirrored as lights when writable**, with on/off, brightness and
