@@ -52,7 +52,7 @@ else is generic.
 | `scene` | not mirrored | `scene`, activate |
 | `input_number` | `sensor` | `number` in the helper's range and step |
 | `timer` | `sensor` with duration, remaining and finishes_at | read-only |
-| `script` | not mirrored | `button` that runs it |
+| `input_button` | not mirrored | `button`, press |
 | `sensor` named in `relays` | `sensor` | `sensor` with all attributes, and a JSON command relayed to a topic |
 | `input_datetime` | `sensor` | `text` in the helper's format, checked as a real date and time |
 

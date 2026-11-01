@@ -7,8 +7,10 @@
   `input_number.set_value`; read-only, a sensor.
 - **Timers**: always read-only, a sensor whose state is idle, active or paused,
   with the timer's attributes (duration, remaining, finishes_at) as JSON.
-- **Scripts**: writable only, an MQTT button whose press calls
-  `script.turn_on`.
+- **`input_button` helpers**: writable only, an MQTT button whose press
+  calls `input_button.press`, as for `button`. Scripts stay unmirrored on
+  purpose: what goes to the mirror is the control an automation listens to,
+  never the script it starts.
 
 ## 0.7.0
 

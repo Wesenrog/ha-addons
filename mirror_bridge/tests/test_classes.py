@@ -56,6 +56,8 @@ SPEED = {"entity_id": "input_number.speed", "state": "45.0",
 TIMER = {"entity_id": "timer.run", "state": "active",
          "attributes": {"duration": "0:30:00", "remaining": "0:30:00",
                         "finishes_at": "2026-11-01T21:00:00+00:00", "friendly_name": "Run"}}
+EXTEND = {"entity_id": "input_button.extend", "state": "unknown",
+          "attributes": {"friendly_name": "Extend"}}
 SCRIPT = {"entity_id": "script.start", "state": "off",
           "attributes": {"friendly_name": "Start"}}
 
@@ -289,14 +291,18 @@ def test_a_timer_is_a_read_only_sensor_with_its_countdown():
     assert ha.calls == []
 
 
-def test_a_writable_script_is_a_button_that_runs_it():
-    spec = classes.describe("script.start", SCRIPT, True)
-    assert spec.component == "button"
-    assert classes.describe("script.start", SCRIPT, False) is None
-    b, ha, _ = bridge([SCRIPT])
-    run(b.handle_command("mirror/cmd/script.start/press", "PRESS"))
-    run(b.handle_command("mirror/cmd/script.start/press", "on"))
-    assert ha.calls == [("script", "turn_on", {"entity_id": "script.start"}, {})]
+def test_a_writable_input_button_presses_it():
+    assert classes.describe("input_button.extend", EXTEND, True).component == "button"
+    assert classes.describe("input_button.extend", EXTEND, False) is None
+    b, ha, _ = bridge([EXTEND])
+    run(b.handle_command("mirror/cmd/input_button.extend/press", "PRESS"))
+    run(b.handle_command("mirror/cmd/input_button.extend/press", "on"))
+    assert ha.calls == [("input_button", "press", {"entity_id": "input_button.extend"}, {})]
+
+
+def test_a_script_is_never_mirrored():
+    for writable in (True, False):
+        assert classes.describe("script.start", SCRIPT, writable) is None
 
 
 if __name__ == "__main__":
