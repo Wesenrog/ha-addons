@@ -46,15 +46,24 @@ else is generic.
 | `input_boolean`, `switch` | `binary_sensor` | `switch`, on/off |
 | `binary_sensor`, `sensor` | same | read-only |
 | `climate` | `climate` | hvac mode and target temperature |
-| `light` | `sensor` (brightness) | `light`: on/off, brightness, colour temperature |
+| `light` | `sensor` (brightness) | `light`: on/off, brightness, colour temperature, colour, effects |
 | `button` | not mirrored | `button`, press |
+| `scene` | not mirrored | `scene`, activate |
 | `input_datetime` | `sensor` | `text` in the helper's format, checked as a real date and time |
 
 A light's writable form is decided per entity from its `supported_color_modes`:
 an on/off bulb gets no brightness slider, and one without `color_temp` gets no
-temperature control. Colour (xy/hs) is not mirrored - the mirror is for seeing
-and setting a room, not for picking colours. A read-only light stays a sensor
-because the MQTT light platform requires a command topic.
+temperature control. A colour light (xy, hs or rgb) gets colour, sent and
+reported as xy - Hue's own form, and an attribute Home Assistant reports for
+every colour light - and a light with an `effect_list` gets its effects, checked
+against that list. The MQTT light takes its colour mode from whichever of colour
+temperature and colour it heard last, so the one the source is in is published
+last. A read-only light stays a sensor because the MQTT light platform requires
+a command topic.
+
+A scene, like a button, is mirrored only when writable: it has no state worth
+showing. Activating it calls `scene.turn_on`, so a Hue dynamic scene starts in
+its static form.
 
 ## Design notes worth keeping
 

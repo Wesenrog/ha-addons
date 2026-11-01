@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0
+
+- **Scenes** are mirrored when writable, as MQTT scenes whose activation
+  calls `scene.turn_on` on the source. A read-only scene is not mirrored.
+- **Light colour**: a colour light (xy, hs or rgb) gets an xy colour command
+  and state, `"x,y"` on the wire, checked as two values in 0-1 before
+  `light.turn_on` is called with `xy_color`. The attribute among colour
+  temperature and colour that matches the source's `color_mode` is published
+  last, since the MQTT light takes its mode from the last it heard. This
+  reverses 0.4.0's choice not to mirror colour.
+- **Light effects**: a light with an `effect_list` gets it on the mirror, and
+  an effect command accepted only if the source lists it.
+- An attribute that is a list or tuple is published as comma-separated text.
+
 ## 0.5.0
 
 - **Buttons** are mirrored when writable, as MQTT buttons whose press calls
