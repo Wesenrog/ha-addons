@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.0
+
+- **Relays**: a new option, `relays`, a list of `"sensor.x=topic"`. A sensor
+  named there that also carries the writable label is another program's
+  interface on the mirror: all its attributes go out as one JSON object
+  (`json_attributes_topic`), and its command topic takes a JSON object of at
+  most 16 KB, published unchanged and unretained on `topic`. Only the shape is
+  checked; the program behind the relay checks the content. A topic with an
+  MQTT wildcard is dropped. Each relayed command is logged with its `op`.
+
 ## 0.6.0
 
 - **Scenes** are mirrored when writable, as MQTT scenes whose activation

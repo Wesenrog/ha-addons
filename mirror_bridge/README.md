@@ -50,6 +50,7 @@ else is generic.
 | `light` | `sensor` (brightness) | `light`: on/off, brightness, colour temperature, colour, effects |
 | `button` | not mirrored | `button`, press |
 | `scene` | not mirrored | `scene`, activate |
+| `sensor` named in `relays` | `sensor` | `sensor` with all attributes, and a JSON command relayed to a topic |
 | `input_datetime` | `sensor` | `text` in the helper's format, checked as a real date and time |
 
 A light's writable form is decided per entity from its `supported_color_modes`:
@@ -61,6 +62,16 @@ against that list. The MQTT light takes its colour mode from whichever of colour
 temperature and colour it heard last, so the one the source is in is published
 last. A read-only light stays a sensor because the MQTT light platform requires
 a command topic.
+
+A **relay** is for a program whose interface is a sensor and a command topic
+- a schedule editor whose state is the sensor's attributes, say. The add-on's
+`relays` option names the sensor and the topic (`"sensor.x=prog/command"`),
+and the sensor needs the writable label as well, so the label stays the
+authorisation and the option says where commands go. On the mirror the sensor
+carries all its attributes, and a JSON object (at most 16 KB) sent to its
+command topic is published unchanged and unretained on that topic. Only the
+shape is checked here: the program behind the relay must check every command
+itself, since anyone who can call `mqtt.publish` on the mirror can send one.
 
 A scene, like a button, is mirrored only when writable: it has no state worth
 showing. Activating it calls `scene.turn_on`, so a Hue dynamic scene starts in
