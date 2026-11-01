@@ -93,10 +93,15 @@ def describe(entity_id: str, state: dict, writable: bool,
         return Spec(component="binary_sensor",
                     config={**common, "payload_on": "on", "payload_off": "off"})
 
+    # Sensors and binary sensors carry all their attributes too, as one JSON
+    # object: a template on the mirror can then read what it reads on the
+    # source (`state_attr('sensor.x', 'problemer')`).
     if domain == "binary_sensor":
         return Spec(component="binary_sensor",
                     config={**common, **_carry(attrs, "device_class"),
-                            "payload_on": "on", "payload_off": "off"})
+                            "payload_on": "on", "payload_off": "off"},
+                    state_map={"json_attributes_topic": "attributes"},
+                    json_attributes=True)
 
     # --- measurements --------------------------------------------------------
     if domain == "sensor":
@@ -118,6 +123,8 @@ def describe(entity_id: str, state: dict, writable: bool,
             component="sensor",
             config={**common, **_carry(attrs, "device_class", "state_class",
                                        "unit_of_measurement")},
+            state_map={"json_attributes_topic": "attributes"},
+            json_attributes=True,
         )
 
     # --- thermostats ---------------------------------------------------------

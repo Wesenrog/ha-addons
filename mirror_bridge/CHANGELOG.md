@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.0
+
+- **Sensors and binary sensors carry their attributes**, as one JSON object on
+  a `json_attributes_topic`, as relays and timers already did. A template on
+  the mirror can then read what it reads on the source -
+  `state_attr('sensor.x', 'problemer')` - so a dashboard can be reproduced
+  there unchanged but for its entity ids.
+
 ## 0.8.1
 
 - **Entity ids from the source again**: discovery sends `default_entity_id`
