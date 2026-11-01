@@ -1,0 +1,5 @@
+# Runtime dependencies, pure Python and pinned exactly (no transitive ones).
+paho-mqtt==2.1.0
+# Europe/Oslo for the scan schedule and daily boundaries; Alpine's Python has
+# no system zoneinfo to rely on.
+tzdata==2026.6

@@ -1,6 +1,6 @@
 # 1. Review of the plan (NOTES.md at 622170d)
 
-**Status:** open
+**Status:** done 0.1.0
 
 **Approved. Build 0.1.0 as planned**, with the answers below. Checking the
 herdsman and Zigbee2MQTT sources and citing them was exactly right; keep doing
