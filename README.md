@@ -33,8 +33,8 @@ mot entitetens egne attributter - et settpunkt klippes til grensene apparatet
 selv oppgir - og medlemskapet er autorisasjonen: en kommando mot noe som ikke
 har `mirror-rw` avvises.
 
-Stotter binary_sensor, sensor, switch, climate og light. Ny enhetsklasse legges
-til i `classes.py`.
+Stotter binary_sensor, sensor, switch, climate, light (med farge og effekter),
+button, input_datetime og scene. Ny enhetsklasse legges til i `classes.py`.
 
 ## Homely
 
