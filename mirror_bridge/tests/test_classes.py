@@ -305,6 +305,14 @@ def test_a_script_is_never_mirrored():
         assert classes.describe("script.start", SCRIPT, writable) is None
 
 
+def test_the_id_is_the_mirror_domain_and_the_source_object_id():
+    b, _ha, _ = bridge([SPEED])
+    payload = b._discovery("input_number.speed", SPEED,
+                           classes.describe("input_number.speed", SPEED, True))
+    assert payload["default_entity_id"] == "number.speed"
+    assert "object_id" not in payload
+
+
 if __name__ == "__main__":
     tests = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_")]
     failed = 0

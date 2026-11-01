@@ -121,8 +121,11 @@ class Bridge:
         meta = self._meta.get(entity_id, {})
         payload = {
             # Keep the mirror's entity_id tied to the source rather than to the
-            # display name, so ids stay predictable when names change.
-            "object_id": entity_id.split(".", 1)[1],
+            # display name, so ids stay predictable when names change. The
+            # mirror's own domain, the source's object id. `object_id` did
+            # this before Home Assistant deprecated it; the mirror now ignores
+            # it and names the entity after its display name.
+            "default_entity_id": f"{spec.component}.{entity_id.split('.', 1)[1]}",
             "unique_id": f"mirror_{entity_id.replace('.', '_')}",
             "availability_topic": cfg.availability_topic,
             "payload_available": "1",
