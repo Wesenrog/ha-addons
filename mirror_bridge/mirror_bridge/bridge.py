@@ -105,7 +105,10 @@ class Bridge:
         for name in spec.attributes:
             value = attributes.get(name)
             if value is not None:
-                # Plain text, not JSON: see the note in classes.py.
+                # Plain text, not JSON: see the note in classes.py. A pair - a
+                # light's xy colour - goes as "x,y", the MQTT light's own form.
+                if isinstance(value, (list, tuple)):
+                    value = ",".join(str(v) for v in value)
                 self._broker.publish(cfg.attribute_topic(entity_id, name), str(value))
 
     def _discovery(self, entity_id, state, spec):
@@ -146,8 +149,8 @@ class Bridge:
             # The one platform that does not call the entity state its "state":
             # for a thermostat that topic carries the hvac mode.
             payload["mode_state_topic"] = cfg.state_topic(entity_id)
-        elif spec.component != "button":
-            # A button has no state on the MQTT platform.
+        elif spec.component not in ("button", "scene"):
+            # A button and a scene have no state on the MQTT platform.
             payload["state_topic"] = cfg.state_topic(entity_id)
 
         # Everything else a platform reads from its own topic - a thermostat's
@@ -266,6 +269,8 @@ class Bridge:
             return True if payload.strip() == "PRESS" else None
         if command.kind == "datetime":
             return _datetime_value(command.data_field, payload.strip())
+        if command.kind == "xy":
+            return _xy_value(payload)
         return None
 
 
@@ -287,3 +292,15 @@ def _datetime_value(field_name, text):
         except ValueError:
             continue
     return None
+
+
+def _xy_value(text):
+    """"x,y" -> [x, y], both in the CIE chromaticity range 0-1, or None."""
+    parts = text.split(",")
+    if len(parts) != 2:
+        return None
+    try:
+        xy = [float(p) for p in parts]
+    except ValueError:
+        return None
+    return xy if all(0.0 <= v <= 1.0 for v in xy) else None

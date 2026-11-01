@@ -26,7 +26,7 @@ class Command:
     """
     service: str                    # "climate.set_temperature"
     data_field: str                 # "temperature"
-    kind: str                       # "onoff" | "number" | "enum" | "press" | "datetime"
+    kind: str                       # "onoff" | "number" | "enum" | "press" | "datetime" | "xy"
     topic_key: str = "command_topic"  # discovery field carrying this topic
     enum_attr: str | None = None    # attribute listing the allowed values
     min_attr: str | None = None     # attribute holding the lower bound
@@ -159,8 +159,9 @@ def describe(entity_id: str, state: dict, writable: bool) -> Spec | None:
     # command topic, so there is no such thing as a light you cannot switch.
     # What a writable one carries is decided per entity from
     # `supported_color_modes`, so a plain on/off bulb does not get a brightness
-    # slider it would ignore. Colour (xy/hs) is deliberately not mirrored -
-    # brightness and colour temperature are what the mirror is for.
+    # slider it would ignore. Colour goes as xy whatever the source's own mode
+    # (xy is what Hue speaks, and Home Assistant reports `xy_color` for every
+    # colour light); effects as the source's own `effect_list`.
     if domain == "light":
         if not writable:
             return Spec(component="sensor", config=common,
@@ -169,6 +170,7 @@ def describe(entity_id: str, state: dict, writable: bool) -> Spec | None:
         modes = set(attrs.get("supported_color_modes") or [])
         dimmable = bool(modes - {"onoff"})
         has_color_temp = "color_temp" in modes
+        has_colour = bool(modes & {"xy", "hs", "rgb", "rgbw", "rgbww"})
 
         cfg = {**common, "payload_on": "on", "payload_off": "off",
                "optimistic": False}
@@ -201,8 +203,39 @@ def describe(entity_id: str, state: dict, writable: bool) -> Spec | None:
                 min_attr="min_color_temp_kelvin", max_attr="max_color_temp_kelvin",
                 as_int=True)
 
+        if has_colour:
+            attributes.append("xy_color")
+            state_map["xy_state_topic"] = "xy_color"
+            commands["xy"] = Command(service="light.turn_on", data_field="xy_color",
+                                     kind="xy", topic_key="xy_command_topic")
+            if has_color_temp and attrs.get("color_mode") == "color_temp":
+                # The MQTT light takes its colour mode from whichever of the two
+                # it heard last, so the one the source is in goes last.
+                attributes.remove("color_temp_kelvin")
+                attributes.append("color_temp_kelvin")
+
+        effects = attrs.get("effect_list")
+        if effects:
+            cfg["effect_list"] = list(effects)
+            attributes.append("effect")
+            state_map["effect_state_topic"] = "effect"
+            commands["effect"] = Command(service="light.turn_on", data_field="effect",
+                                         kind="enum", topic_key="effect_command_topic",
+                                         enum_attr="effect_list")
+
         return Spec(component="light", config=cfg, attributes=tuple(attributes),
                     state_map=state_map, commands=commands)
+
+    # --- scenes --------------------------------------------------------------
+    # Like a button: only a writable scene is mirrored, and it has no state
+    # worth showing. The MQTT scene's payload is PRESS, so the button's check
+    # serves both.
+    if domain == "scene":
+        if not writable:
+            return None
+        return Spec(component="scene", config={**common, "payload_on": "PRESS"},
+                    commands={"activate": Command(service="scene.turn_on", data_field="",
+                                                  kind="press")})
 
     return None
 
@@ -213,7 +246,8 @@ def describe(entity_id: str, state: dict, writable: bool) -> Spec | None:
 ALLOWED = {
     "switch": {"set"},
     "climate": {"mode", "temperature"},
-    "light": {"set", "brightness", "color_temp"},
+    "light": {"set", "brightness", "color_temp", "xy", "effect"},
     "button": {"press"},
     "text": {"set"},
+    "scene": {"activate"},
 }
