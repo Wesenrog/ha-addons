@@ -247,6 +247,41 @@ def describe(entity_id: str, state: dict, writable: bool,
         return Spec(component="light", config=cfg, attributes=tuple(attributes),
                     state_map=state_map, commands=commands)
 
+    # --- number helpers -----------------------------------------------------
+    # Writable, an MQTT number held to the helper's own min, max and step, and
+    # checked against them again on the way in. Read-only, a sensor.
+    if domain == "input_number":
+        unit = _carry(attrs, "unit_of_measurement")
+        if not writable:
+            return Spec(component="sensor", config={**common, **unit})
+        return Spec(component="number",
+                    config={**common, **unit,
+                            "min": attrs.get("min", 0), "max": attrs.get("max", 100),
+                            "step": attrs.get("step", 1),
+                            "mode": "box" if attrs.get("mode") == "box" else "slider"},
+                    commands={"set": Command(service="input_number.set_value",
+                                             data_field="value", kind="number",
+                                             min_attr="min", max_attr="max")})
+
+    # --- timers --------------------------------------------------------------
+    # Read-only whatever the label says: a sensor whose state is idle, active
+    # or paused, with the timer's own attributes (duration, remaining,
+    # finishes_at) alongside, so a countdown can be shown.
+    if domain == "timer":
+        return Spec(component="sensor", config=common,
+                    state_map={"json_attributes_topic": "attributes"},
+                    json_attributes=True)
+
+    # --- scripts -------------------------------------------------------------
+    # Like a button: only a writable script is mirrored, and pressing it runs
+    # the script (script.turn_on, so a long script does not hold the command).
+    if domain == "script":
+        if not writable:
+            return None
+        return Spec(component="button", config={**common, "payload_press": "PRESS"},
+                    commands={"press": Command(service="script.turn_on", data_field="",
+                                               kind="press")})
+
     # --- scenes --------------------------------------------------------------
     # Like a button: only a writable scene is mirrored, and it has no state
     # worth showing. The MQTT scene's payload is PRESS, so the button's check
@@ -272,4 +307,5 @@ ALLOWED = {
     "text": {"set"},
     "scene": {"activate"},
     "sensor": {"command"},
+    "number": {"set"},
 }

@@ -1,5 +1,6 @@
 """Buttons and date/time helpers (0.5.0), scenes, light colour and effects
-(0.6.0), relays (0.7.0) on the mirror: what each becomes, and that a command is checked before
+(0.6.0), relays (0.7.0), number helpers, timers and scripts (0.8.0) on the
+mirror: what each becomes, and that a command is checked before
 any service is called."""
 import asyncio
 import json
@@ -49,6 +50,14 @@ class FakeBroker:
 EDITOR = {"entity_id": "sensor.editor", "state": "ok",
           "attributes": {"zones": {"a": {"programme": {"mon": [[0, 19.0]]}}},
                          "last": None, "friendly_name": "Editor"}}
+SPEED = {"entity_id": "input_number.speed", "state": "45.0",
+         "attributes": {"min": 0, "max": 100, "step": 5, "mode": "slider",
+                        "unit_of_measurement": "%", "friendly_name": "Speed"}}
+TIMER = {"entity_id": "timer.run", "state": "active",
+         "attributes": {"duration": "0:30:00", "remaining": "0:30:00",
+                        "finishes_at": "2026-11-01T21:00:00+00:00", "friendly_name": "Run"}}
+SCRIPT = {"entity_id": "script.start", "state": "off",
+          "attributes": {"friendly_name": "Start"}}
 
 
 def bridge(states, writable=True):
@@ -248,6 +257,46 @@ def test_a_read_only_relay_sensor_refuses_commands():
     broker.publish = lambda topic, payload, retain=True: sent.append(topic)
     run(b.handle_command("mirror/cmd/sensor.editor/command", '{"op": "refresh"}'))
     assert sent == []
+
+
+def test_a_writable_number_helper_is_a_number_held_to_its_range():
+    spec = classes.describe("input_number.speed", SPEED, True)
+    assert spec.component == "number"
+    assert (spec.config["min"], spec.config["max"], spec.config["step"]) == (0, 100, 5)
+    assert spec.config["unit_of_measurement"] == "%"
+    b, ha, _ = bridge([SPEED])
+    run(b.handle_command("mirror/cmd/input_number.speed/set", "60"))
+    run(b.handle_command("mirror/cmd/input_number.speed/set", "250"))
+    run(b.handle_command("mirror/cmd/input_number.speed/set", "fast"))
+    assert ha.calls == [("input_number", "set_value", {"entity_id": "input_number.speed"},
+                         {"value": 60.0}),
+                        ("input_number", "set_value", {"entity_id": "input_number.speed"},
+                         {"value": 100.0})]
+
+
+def test_a_read_only_number_helper_is_a_sensor():
+    assert classes.describe("input_number.speed", SPEED, False).component == "sensor"
+
+
+def test_a_timer_is_a_read_only_sensor_with_its_countdown():
+    for writable in (True, False):
+        spec = classes.describe("timer.run", TIMER, writable)
+        assert spec.component == "sensor" and spec.commands == {}
+    b, ha, broker = bridge([TIMER])
+    b.publish_entity("timer.run", TIMER)
+    assert json.loads(broker.sent["mirror/state/timer/run/attributes"])["finishes_at"]
+    run(b.handle_command("mirror/cmd/timer.run/set", "idle"))
+    assert ha.calls == []
+
+
+def test_a_writable_script_is_a_button_that_runs_it():
+    spec = classes.describe("script.start", SCRIPT, True)
+    assert spec.component == "button"
+    assert classes.describe("script.start", SCRIPT, False) is None
+    b, ha, _ = bridge([SCRIPT])
+    run(b.handle_command("mirror/cmd/script.start/press", "PRESS"))
+    run(b.handle_command("mirror/cmd/script.start/press", "on"))
+    assert ha.calls == [("script", "turn_on", {"entity_id": "script.start"}, {})]
 
 
 if __name__ == "__main__":

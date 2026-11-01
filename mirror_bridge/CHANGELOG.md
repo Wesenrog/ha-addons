@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0
+
+- **`input_number` helpers**: writable, an MQTT number with the helper's own
+  min, max, step, mode and unit, a command clamped to the range before
+  `input_number.set_value`; read-only, a sensor.
+- **Timers**: always read-only, a sensor whose state is idle, active or paused,
+  with the timer's attributes (duration, remaining, finishes_at) as JSON.
+- **Scripts**: writable only, an MQTT button whose press calls
+  `script.turn_on`.
+
 ## 0.7.0
 
 - **Relays**: a new option, `relays`, a list of `"sensor.x=topic"`. A sensor
