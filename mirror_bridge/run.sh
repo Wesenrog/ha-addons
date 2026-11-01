@@ -10,6 +10,7 @@ export MIRROR_BASE_TOPIC="$(bashio::config 'base_topic')"
 export MIRROR_DISCOVERY_PREFIX="$(bashio::config 'discovery_prefix')"
 export MIRROR_DEVICE_NAME="$(bashio::config 'device_name')"
 export MIRROR_LOG_LEVEL="$(bashio::config 'log_level')"
+export MIRROR_RELAYS="$(jq -r '(.relays // []) | join(",")' /data/options.json)"
 
 # An explicitly configured account wins over the injected service credentials.
 if [[ -n "$(bashio::config 'mqtt_user')" ]]; then

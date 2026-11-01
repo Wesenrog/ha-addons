@@ -11,6 +11,9 @@ class Config:
             "MIRROR_DISCOVERY_PREFIX", "mirror/discovery").rstrip("/")
         self.device_name = os.environ.get("MIRROR_DEVICE_NAME", "Pi mirror")
         self.log_level = os.environ.get("MIRROR_LOG_LEVEL", "info").upper()
+        # "sensor.x=some/topic,sensor.y=other/topic": the sensors whose command
+        # is relayed, and where to (classes.py, the sensor class).
+        self.relays = parse_relays(os.environ.get("MIRROR_RELAYS", ""))
 
         self.mqtt_host = os.environ.get("MQTT_HOST", "core-mosquitto")
         self.mqtt_port = int(os.environ.get("MQTT_PORT", "1883"))
@@ -38,3 +41,15 @@ class Config:
         # Published by the mosquitto bridge's own will, so the mirror greys out
         # when the tunnel drops rather than showing stale values as live.
         return f"{self.base_topic}/link"
+
+
+def parse_relays(text):
+    """"entity=topic" pairs, comma-separated -> {entity: topic}. A malformed
+    pair, or a topic with an MQTT wildcard, is dropped rather than guessed at."""
+    out = {}
+    for item in text.split(","):
+        entity, sep, topic = item.strip().partition("=")
+        entity, topic = entity.strip(), topic.strip()
+        if sep and entity.startswith("sensor.") and topic and not set(topic) & set("#+"):
+            out[entity] = topic
+    return out

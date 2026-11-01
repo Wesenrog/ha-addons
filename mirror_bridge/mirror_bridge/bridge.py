@@ -87,7 +87,8 @@ class Bridge:
 
     def publish_entity(self, entity_id, state, announce=False):
         writable = self._members.get(entity_id, False)
-        spec = classes.describe(entity_id, state, writable)
+        spec = classes.describe(entity_id, state, writable,
+                                relay=self._cfg.relays.get(entity_id))
         if spec is None:
             if entity_id not in self._unsupported:
                 self._unsupported.add(entity_id)
@@ -102,6 +103,9 @@ class Bridge:
 
         self._broker.publish(cfg.state_topic(entity_id), str(state.get("state")))
         attributes = state.get("attributes", {}) or {}
+        if spec.json_attributes:
+            self._broker.publish(cfg.attribute_topic(entity_id, "attributes"),
+                                 json.dumps(attributes, default=str))
         for name in spec.attributes:
             value = attributes.get(name)
             if value is not None:
@@ -206,7 +210,8 @@ class Bridge:
         state = states.get(entity_id)
         if state is None:
             return
-        spec = classes.describe(entity_id, state, True)
+        relay = self._cfg.relays.get(entity_id)
+        spec = classes.describe(entity_id, state, True, relay=relay)
         if spec is None or capability not in classes.ALLOWED.get(spec.component, ()):
             _LOG.warning("rejecting %s on %s: capability not allowed",
                          capability, entity_id)
@@ -223,6 +228,12 @@ class Bridge:
         # TODO(verify against the live system): confirm homeassistant.turn_on /
         # turn_off is the right generic for the onoff kind across the domains we
         # label, and that call_service accepts an empty service_data.
+        if command.kind == "relay":
+            # Passed on unchanged, and never retained: a retained command would
+            # run again every time the program behind it subscribed.
+            self._broker.publish(relay, payload, retain=False)
+            _LOG.info("%s relayed %r to %s", entity_id, value.get("op"), relay)
+            return
         domain = command.service.split(".", 1)[0]
         if command.kind == "onoff":
             service = "turn_on" if value else "turn_off"
@@ -271,6 +282,8 @@ class Bridge:
             return _datetime_value(command.data_field, payload.strip())
         if command.kind == "xy":
             return _xy_value(payload)
+        if command.kind == "relay":
+            return _relay_value(payload)
         return None
 
 
@@ -304,3 +317,18 @@ def _xy_value(text):
     except ValueError:
         return None
     return xy if all(0.0 <= v <= 1.0 for v in xy) else None
+
+
+RELAY_MAX = 16384     # bytes; a week's programme for a zone is well under 2 KB
+
+
+def _relay_value(text):
+    """A JSON object of at most RELAY_MAX bytes, or None. Only the shape is
+    checked here; the program the relay feeds checks the content."""
+    if len(text.encode()) > RELAY_MAX:
+        return None
+    try:
+        value = json.loads(text)
+    except ValueError:
+        return None
+    return value if isinstance(value, dict) else None

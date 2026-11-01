@@ -1,5 +1,5 @@
 name: Mirror Bridge
-version: 0.6.0
+version: 0.7.0
 slug: mirror_bridge
 description: >-
   Publishes label-selected entities to MQTT with discovery, so a remote Home
@@ -39,6 +39,11 @@ options:
   discovery_prefix: mirror/discovery
   device_name: Pi mirror
   log_level: info
+  # Sensors that relay a command, as "sensor.x=topic": the sensor's JSON
+  # attributes are mirrored, and a JSON object sent to its command topic on
+  # the mirror is published, unretained, on `topic`. Needs the writable label
+  # too. Empty, nothing is relayed.
+  relays: []
 
 schema:
   mqtt_user: str?
@@ -49,3 +54,5 @@ schema:
   discovery_prefix: str
   device_name: str
   log_level: list(debug|info|warning|error)
+  relays:
+    - "match(^sensor\\.[a-z0-9_]+=[^#+]+$)?"

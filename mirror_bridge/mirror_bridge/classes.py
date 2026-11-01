@@ -26,7 +26,7 @@ class Command:
     """
     service: str                    # "climate.set_temperature"
     data_field: str                 # "temperature"
-    kind: str                       # "onoff" | "number" | "enum" | "press" | "datetime" | "xy"
+    kind: str                       # "onoff" | "number" | "enum" | "press" | "datetime" | "xy" | "relay"
     topic_key: str = "command_topic"  # discovery field carrying this topic
     enum_attr: str | None = None    # attribute listing the allowed values
     min_attr: str | None = None     # attribute holding the lower bound
@@ -45,6 +45,9 @@ class Spec:
     # that read parts of their state from somewhere other than `state_topic`.
     state_map: dict = field(default_factory=dict)
     commands: dict = field(default_factory=dict)    # capability -> Command
+    # Publish every attribute as one JSON object on the "attributes" topic,
+    # for the MQTT platform's json_attributes_topic.
+    json_attributes: bool = False
 
 
 ONOFF = Command(service="homeassistant.turn_on", data_field="", kind="onoff")
@@ -63,8 +66,12 @@ def _carry(attrs, *names):
     return {n: attrs[n] for n in names if attrs.get(n) is not None}
 
 
-def describe(entity_id: str, state: dict, writable: bool) -> Spec | None:
+def describe(entity_id: str, state: dict, writable: bool,
+             relay: str | None = None) -> Spec | None:
     """Map a Home Assistant entity to its representation on the mirror.
+
+    `relay` is the topic the add-on's `relays` option names for this entity,
+    if any (see the sensor class).
 
     Returns None for a domain this add-on does not know how to mirror, which is
     logged once rather than failing - an unsupported label is a mistake to
@@ -93,6 +100,20 @@ def describe(entity_id: str, state: dict, writable: bool) -> Spec | None:
 
     # --- measurements --------------------------------------------------------
     if domain == "sensor":
+        if writable and relay:
+            # A relay: a sensor that is another program's interface - its
+            # attributes the state that program publishes, its command a JSON
+            # object passed on to that program's own topic. Live only with both
+            # the writable label and the add-on's `relays` option naming it;
+            # the program behind it checks every command itself.
+            return Spec(
+                component="sensor",
+                config={**common, **_carry(attrs, "unit_of_measurement")},
+                state_map={"json_attributes_topic": "attributes"},
+                commands={"command": Command(service="", data_field="",
+                                             kind="relay")},
+                json_attributes=True,
+            )
         return Spec(
             component="sensor",
             config={**common, **_carry(attrs, "device_class", "state_class",
@@ -250,4 +271,5 @@ ALLOWED = {
     "button": {"press"},
     "text": {"set"},
     "scene": {"activate"},
+    "sensor": {"command"},
 }

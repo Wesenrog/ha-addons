@@ -1,5 +1,5 @@
 """Buttons and date/time helpers (0.5.0), scenes, light colour and effects
-(0.6.0) on the mirror: what each becomes, and that a command is checked before
+(0.6.0), relays (0.7.0) on the mirror: what each becomes, and that a command is checked before
 any service is called."""
 import asyncio
 import json
@@ -46,12 +46,16 @@ class FakeBroker:
 
     def retract(self, topic):
         self.sent.pop(topic, None)
+EDITOR = {"entity_id": "sensor.editor", "state": "ok",
+          "attributes": {"zones": {"a": {"programme": {"mon": [[0, 19.0]]}}},
+                         "last": None, "friendly_name": "Editor"}}
 
 
 def bridge(states, writable=True):
     ha, broker = FakeHA(states), FakeBroker()
     b = Bridge(Config(), ha, broker)
     b._members = {s["entity_id"]: writable for s in states}
+    b._cfg.relays = {"sensor.editor": "prog/editor/command"}
     return b, ha, broker
 
 
@@ -195,6 +199,55 @@ def test_an_effect_must_be_one_the_light_lists():
     run(b.handle_command("mirror/cmd/light.lamp/effect", "disco"))
     assert ha.calls == [("light", "turn_on", {"entity_id": "light.lamp"},
                          {"effect": "candle"})]
+
+
+def test_relays_are_parsed_and_wildcards_dropped():
+    from mirror_bridge.config import parse_relays
+    assert parse_relays(" sensor.editor = prog/editor/command ,sensor.x=a/#,light.y=b,junk") \
+        == {"sensor.editor": "prog/editor/command"}
+    assert parse_relays("") == {}
+
+
+def test_a_relay_sensor_carries_its_attributes_and_a_command():
+    b, _ha, broker = bridge([EDITOR])
+    spec = classes.describe("sensor.editor", EDITOR, True, relay="prog/editor/command")
+    payload = b._discovery("sensor.editor", EDITOR, spec)
+    assert payload["json_attributes_topic"] == "mirror/state/sensor/editor/attributes"
+    assert payload["command_topic"] == "mirror/cmd/sensor.editor/command"
+    b.publish_entity("sensor.editor", EDITOR)
+    assert json.loads(broker.sent["mirror/state/sensor/editor/attributes"])["zones"]["a"]
+
+
+def test_a_sensor_without_the_option_or_the_label_is_a_plain_sensor():
+    assert classes.describe("sensor.editor", EDITOR, True).commands == {}
+    assert classes.describe("sensor.editor", EDITOR, False, relay="t").commands == {}
+
+
+def test_a_command_is_relayed_unchanged_and_unretained():
+    b, ha, broker = bridge([EDITOR])
+    sent = []
+    broker.publish = lambda topic, payload, retain=True: sent.append((topic, payload, retain))
+    cmd = '{"id": "x1", "op": "refresh"}'
+    run(b.handle_command("mirror/cmd/sensor.editor/command", cmd))
+    assert sent == [("prog/editor/command", cmd, False)]
+    assert ha.calls == []
+
+
+def test_only_a_json_object_within_the_limit_is_relayed():
+    b, _ha, broker = bridge([EDITOR])
+    sent = []
+    broker.publish = lambda topic, payload, retain=True: sent.append(topic)
+    for bad in ("refresh", "[1, 2]", '"op"', "", '{"op": "%s"}' % ("x" * 20000)):
+        run(b.handle_command("mirror/cmd/sensor.editor/command", bad))
+    assert sent == []
+
+
+def test_a_read_only_relay_sensor_refuses_commands():
+    b, _ha, broker = bridge([EDITOR], writable=False)
+    sent = []
+    broker.publish = lambda topic, payload, retain=True: sent.append(topic)
+    run(b.handle_command("mirror/cmd/sensor.editor/command", '{"op": "refresh"}'))
+    assert sent == []
 
 
 if __name__ == "__main__":
