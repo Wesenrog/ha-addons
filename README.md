@@ -34,7 +34,7 @@ selv oppgir - og medlemskapet er autorisasjonen: en kommando mot noe som ikke
 har `mirror-rw` avvises.
 
 Stotter binary_sensor, sensor, switch, climate, light (med farge og effekter),
-button, input_datetime og scene. Ny enhetsklasse legges til i `classes.py`.
+button, input_button, input_datetime, input_number, timer og scene. Ny enhetsklasse legges til i `classes.py`.
 
 ## Zigbee Watch
 

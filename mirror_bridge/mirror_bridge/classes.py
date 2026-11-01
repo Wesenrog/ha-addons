@@ -153,11 +153,14 @@ def describe(entity_id: str, state: dict, writable: bool,
     # --- buttons -------------------------------------------------------------
     # Only a writable button is mirrored: its state is the time it was last
     # pressed, which nobody reads, and a button you cannot press is nothing.
-    if domain == "button":
+    # An input_button is the same thing as a helper: the control an
+    # automation listens to. Scripts are deliberately not a class - what is
+    # mirrored is the control that starts one, never the script itself.
+    if domain in ("button", "input_button"):
         if not writable:
             return None
         return Spec(component="button", config={**common, "payload_press": "PRESS"},
-                    commands={"press": Command(service="button.press", data_field="",
+                    commands={"press": Command(service="%s.press" % domain, data_field="",
                                                kind="press")})
 
     # --- date and time helpers -----------------------------------------------
@@ -247,6 +250,32 @@ def describe(entity_id: str, state: dict, writable: bool,
         return Spec(component="light", config=cfg, attributes=tuple(attributes),
                     state_map=state_map, commands=commands)
 
+    # --- number helpers -----------------------------------------------------
+    # Writable, an MQTT number held to the helper's own min, max and step, and
+    # checked against them again on the way in. Read-only, a sensor.
+    if domain == "input_number":
+        unit = _carry(attrs, "unit_of_measurement")
+        if not writable:
+            return Spec(component="sensor", config={**common, **unit})
+        return Spec(component="number",
+                    config={**common, **unit,
+                            "min": attrs.get("min", 0), "max": attrs.get("max", 100),
+                            "step": attrs.get("step", 1),
+                            "mode": "box" if attrs.get("mode") == "box" else "slider"},
+                    commands={"set": Command(service="input_number.set_value",
+                                             data_field="value", kind="number",
+                                             min_attr="min", max_attr="max")})
+
+    # --- timers --------------------------------------------------------------
+    # Read-only whatever the label says: a sensor whose state is idle, active
+    # or paused, with the timer's own attributes (duration, remaining,
+    # finishes_at) alongside, so a countdown can be shown.
+    if domain == "timer":
+        return Spec(component="sensor", config=common,
+                    state_map={"json_attributes_topic": "attributes"},
+                    json_attributes=True)
+
+
     # --- scenes --------------------------------------------------------------
     # Like a button: only a writable scene is mirrored, and it has no state
     # worth showing. The MQTT scene's payload is PRESS, so the button's check
@@ -272,4 +301,5 @@ ALLOWED = {
     "text": {"set"},
     "scene": {"activate"},
     "sensor": {"command"},
+    "number": {"set"},
 }
