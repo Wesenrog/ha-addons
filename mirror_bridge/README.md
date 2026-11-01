@@ -45,7 +45,7 @@ else is generic.
 | Source domain | On the mirror | Writable form |
 |---|---|---|
 | `input_boolean`, `switch` | `binary_sensor` | `switch`, on/off |
-| `binary_sensor`, `sensor` | same | read-only |
+| `binary_sensor`, `sensor` | same, with all attributes as JSON | read-only |
 | `climate` | `climate` | hvac mode and target temperature |
 | `light` | `sensor` (brightness) | `light`: on/off, brightness, colour temperature, colour, effects |
 | `button` | not mirrored | `button`, press |

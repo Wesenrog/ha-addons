@@ -313,6 +313,19 @@ def test_the_id_is_the_mirror_domain_and_the_source_object_id():
     assert "object_id" not in payload
 
 
+def test_a_sensor_and_a_binary_sensor_carry_their_attributes():
+    st = {"entity_id": "sensor.status", "state": "ok",
+          "attributes": {"problemer": ["a", "b"], "friendly_name": "Status"}}
+    b, _ha, broker = bridge([st], writable=False)
+    spec = classes.describe("sensor.status", st, False)
+    assert b._discovery("sensor.status", st, spec)["json_attributes_topic"] == \
+        "mirror/state/sensor/status/attributes"
+    b.publish_entity("sensor.status", st)
+    assert json.loads(broker.sent["mirror/state/sensor/status/attributes"])["problemer"] == ["a", "b"]
+    bs = {"entity_id": "binary_sensor.p", "state": "off", "attributes": {"since": "x"}}
+    assert classes.describe("binary_sensor.p", bs, False).json_attributes
+
+
 if __name__ == "__main__":
     tests = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_")]
     failed = 0
