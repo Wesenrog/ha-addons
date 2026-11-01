@@ -173,8 +173,12 @@ and produced `sensor.pi_mirror_radiator_gang_2_etasje_temperature`, "Pi mirror
 Radiator gang 2. etasje Temperature". The length was double composition, not
 verbosity.
 
-`object_id` ties the mirror's entity_id to the **source entity_id**, not to the
-display name, so ids stay predictable when names change.
+`default_entity_id` ties the mirror's entity_id to the **source entity_id** -
+the mirror's domain, the source's object id: `input_number.fan_day_speed`
+becomes `number.fan_day_speed` - not to the display name, so ids stay
+predictable when names change. (Up to 0.8.0 this was `object_id`, which Home
+Assistant deprecated and now ignores; entities first registered then got
+name-derived ids, and keep them until renamed as below.)
 
 **Renaming an existing entity does not move its entity_id.** Home Assistant
 keeps deleted registry records and restores the previous entity_id when the same
@@ -218,7 +222,7 @@ registry rename described above.
 
 With a `device` block in the discovery payload, Home Assistant composes both the
 friendly name and the entity_id from the device name, giving
-`sensor.pi_mirror_viftehastighet`. Neither `object_id` nor
+`sensor.pi_mirror_viftehastighet`. Neither `default_entity_id` nor
 `has_entity_name: false` overrides it. The options are to accept it, to rename
 on the mirror (registry overrides survive discovery updates), or to drop the
 device block and lose the grouping.

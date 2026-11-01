@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.1
+
+- **Entity ids from the source again**: discovery sends `default_entity_id`
+  (`<mirror domain>.<source object id>`) instead of `object_id`, which Home
+  Assistant deprecated and now ignores - so an entity whose display name
+  differs from its id was registered under a name-derived id
+  (`number.viftehastighet_dag` for `input_number.fan_day_speed`). This
+  applies to entities registered from now on; ones already registered keep
+  their id until renamed on the mirror (`config/entity_registry/update` with
+  `new_entity_id`).
+
 ## 0.8.0
 
 - **`input_number` helpers**: writable, an MQTT number with the helper's own
