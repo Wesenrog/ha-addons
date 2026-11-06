@@ -5,10 +5,11 @@ remote mirror needs no YAML and the Pi needs no restarts.
 
 **Status: in production.** It is the mirror - the statestream block, the
 dispatcher automations and the mirror's MQTT YAML have all been removed. As of
-version 0.6.0 it publishes about a hundred entities by label: thermostats with
-their battery and temperature sensors, a heating zone with its status and
-cancel button, override and away switches with a return time, a day/night flag,
-a fan-speed sensor, and one room's six lights and its Hue scenes.
+version 0.9.0 it publishes over two hundred entities by label: every heating
+zone with its status and cancel button, the thermostats with their battery and
+temperature sensors, away with its return time, a schedule editor through a
+relay, the ventilation and cooling controls and their timers, and the lights
+and Hue scenes of several rooms.
 
 ## Why it exists
 
@@ -218,24 +219,25 @@ re-announces affected entities - no restart, no Home Assistant reload. Changing
 a *name* updates in place; changing an entity_id additionally requires the
 registry rename described above.
 
-## Known cosmetic wart
+## Installing
 
-With a `device` block in the discovery payload, Home Assistant composes both the
-friendly name and the entity_id from the device name, giving
-`sensor.pi_mirror_viftehastighet`. Neither `default_entity_id` nor
-`has_entity_name: false` overrides it. The options are to accept it, to rename
-on the mirror (registry overrides survive discovery updates), or to drop the
-device block and lose the grouping.
+From this repository, like the other add-ons here: add
+`https://github.com/wesenrog/ha-addons` under Settings -> Add-ons -> Add-on
+Store -> three dots -> Repositories, then install Mirror Bridge. A new version
+arrives as an ordinary add-on update once its `config.yaml` version is on
+`main`.
 
-## Deploying it locally
+## Options
 
-Local add-ons live in `/addons/<slug>/` on the Pi:
-
-    scp -O -P 2222 -r addons/mirror-bridge hassio@192.168.1.201:/tmp/
-    ssh -p 2222 hassio@192.168.1.201 'sudo mv /tmp/mirror-bridge /addons/mirror_bridge'
-
-Then Settings -> Add-ons -> Add-on Store -> three dots -> Check for updates, and
-it appears under "Local add-ons".
+| Option | Default | |
+|---|---|---|
+| `label`, `label_rw` | `mirror`, `mirror-rw` | the labels that make an entity mirrored and writable |
+| `base_topic` | `mirror` | state and command topics, `<base>/state/...` and `<base>/cmd/...` |
+| `discovery_prefix` | `mirror/discovery` | the mirror's MQTT discovery prefix |
+| `device_name` | `Pi mirror` | unused since 0.3.0, when the synthetic device went; read and ignored |
+| `relays` | empty | a list of `"sensor.x=topic"` (see Classes above) |
+| `mqtt_user`, `mqtt_password` | empty | only when the Supervisor's injected credentials cannot be used |
+| `log_level` | `info` | |
 
 ## Bridge and mirror configuration
 

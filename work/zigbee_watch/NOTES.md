@@ -2,8 +2,8 @@
 
 ## Status
 
-**0.1.0 built, tested here, not yet run on the Pi.** Change request 01 (plan
-review) is done. Branch: `claude/laughing-newton-1l3am4`.
+**0.1.0 merged and running on the Pi**, installed from this repository, with
+its data in `/share/zigbee_watch/`. Change request 01 (plan review) is done.
 
 Tests: 38, all passing, against an in-process amqtt broker and a fake
 Zigbee2MQTT; they need no house. Run them from `zigbee_watch/`:
@@ -111,12 +111,18 @@ references are in the code: `logpatterns.py` (every log text), `networkmap.py`
    themselves. Default: no button in 0.1.0, to keep the add-on free of command
    topics.
 
+## Seen on the real mesh
+
+- **Image build:** builds on the Pi from this repository.
+- **Entity ids:** `default_entity_id` gives the five entity ids on Core
+  2026.10.2.
+- **Route errors** arrive on `bridge/logging` and are counted per device, with
+  `lyttet_andel` 1.0.
+- **Nightly map:** `kartstatus` `ok`, the map stored after the scheduled time.
+
 ## Still to be seen on the real mesh
 
-- **Image build:** not built here; there is no Docker daemon in this
-  environment. `requirements.txt` is pure Python, so nothing needs compiling.
-- **Route errors:** do they arrive on `bridge/logging` with the expected text,
-  and how do the counts compare with Zigbee2MQTT's log files?
+- **Route error counts** against Zigbee2MQTT's log files.
 - **Unknown lines:** after a week, `log_unmatched` (and the report's "Ukjente
   advarsler/feil") will show which warnings this table does not know yet.
 - **Republish windows:** are 120 s and 150 s long enough for the cached-state
@@ -128,5 +134,3 @@ references are in the code: `logpatterns.py` (every log text), `networkmap.py`
     as `ambiguous`);
   - whether routers show a relationship-0 entry or only a route to the
     coordinator.
-- **Entity ids:** that `default_entity_id` gives the five entity ids on Core
-  2026.10.2.
