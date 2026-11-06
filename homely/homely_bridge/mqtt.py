@@ -103,6 +103,7 @@ def discovery_payload(
     language: str,
     entity_id_prefix: str,
     json_attributes_topic: str | None = None,
+    json_attributes_template: str | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "name": entity_name(spec.name_id, language),
@@ -135,5 +136,7 @@ def discovery_payload(
         payload["icon"] = spec.icon
     if json_attributes_topic:
         payload["json_attributes_topic"] = json_attributes_topic
+    if json_attributes_template:
+        payload["json_attributes_template"] = json_attributes_template
     payload.update(spec.extra)
     return payload

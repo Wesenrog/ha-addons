@@ -371,12 +371,10 @@ def entity_spec(model_name: str, feature: str, state: str) -> EntitySpec | None:
 ONLINE_SPEC = EntitySpec("online", "binary_sensor", "online", on_off, "connectivity", entity_category="diagnostic")
 
 
-def device_entities(device: dict[str, Any]) -> list[tuple[EntitySpec, Any]]:
-    """Return (spec, raw value) for every supported state of a device."""
+def _device_states(device: dict[str, Any]) -> list[tuple[EntitySpec, dict[str, Any]]]:
+    """Return (spec, Homely state) for every supported feature state of a device."""
     model_name = str(device.get("modelName") or "")
-    result: list[tuple[EntitySpec, Any]] = []
-    if "online" in device:
-        result.append((ONLINE_SPEC, device["online"]))
+    result: list[tuple[EntitySpec, dict[str, Any]]] = []
     features = device.get("features") or {}
     for feature, fdata in features.items():
         states = (fdata or {}).get("states") or {}
@@ -387,7 +385,16 @@ def device_entities(device: dict[str, Any]) -> list[tuple[EntitySpec, Any]]:
             if spec is None:
                 _LOGGER.debug("Ignoring unsupported state %s.%s on %s", feature, state, model_name)
                 continue
-            result.append((spec, sdata["value"]))
+            result.append((spec, sdata))
+    return result
+
+
+def device_entities(device: dict[str, Any]) -> list[tuple[EntitySpec, Any]]:
+    """Return (spec, raw value) for every supported state of a device."""
+    result: list[tuple[EntitySpec, Any]] = []
+    if "online" in device:
+        result.append((ONLINE_SPEC, device["online"]))
+    result += [(spec, sdata["value"]) for spec, sdata in _device_states(device)]
     return result
 
 
@@ -397,6 +404,11 @@ def device_state_payload(device: dict[str, Any]) -> dict[str, Any]:
     for spec, raw in device_entities(device):
         payload[spec.key] = spec.convert(raw)
     return payload
+
+
+def device_last_updated(device: dict[str, Any]) -> dict[str, Any]:
+    """Return Homely's lastUpdated per entity key: when Homely last received each state."""
+    return {spec.key: sdata.get("lastUpdated") for spec, sdata in _device_states(device)}
 
 
 def device_has_problem(device: dict[str, Any], feature: str, states: tuple[str, ...]) -> bool:
