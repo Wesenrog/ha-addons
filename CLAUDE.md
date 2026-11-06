@@ -11,8 +11,10 @@ credentials, people's names or data exported from the house.
   `main`: `git fetch origin && git switch -c <addon>/<topic> origin/main`, for
   example `zigbee_watch/first-version`. If your session was assigned a branch,
   use that one instead.
-- Push the branch and open a pull request if you can. The owner reviews and
-  merges; never merge yourself.
+- Push the branch and open a pull request if you can. Then ask the owner
+  whether to merge it, and merge only on an explicit yes to that question, for
+  that pull request. A yes to an earlier one, or to opening it, is not a yes
+  to merge.
 - At the start of every session, `git fetch origin` and rebase your branch on
   `origin/main`, because reviews and change requests arrive on `main`.
 
