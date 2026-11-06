@@ -38,6 +38,9 @@ def test_full_flow(fake, running):
         {"feature": "humidity", "stateName": "humidity", "value": 41.5, "lastUpdated": "2026-10-30T10:00:01Z"},
     ]}})
     wait_for(lambda: mq.json(f"homely/{LOCATION}/{MOTION}/state")["alarm_alarm"] == "ON")
+    assert mq.json(f"homely/{LOCATION}/{MOTION}/attributes")["alarm_alarm"] == "2026-10-30T10:00:01Z"
+    assert disc["json_attributes_topic"] == f"homely/{LOCATION}/{MOTION}/attributes"
+    assert "json_attributes_topic" not in mq.json(f"homeassistant/binary_sensor/homely_{MOTION}/online/config")
     assert mq.json(f"homely/{LOCATION}/{MOTION}/state")["humidity_humidity"] == 41.5
     wait_for(lambda: mq.json(f"homeassistant/sensor/homely_{MOTION}/humidity_humidity/config"))
 

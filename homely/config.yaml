@@ -1,5 +1,5 @@
 name: Homely
-version: "0.4.2"
+version: "0.4.3"
 slug: homely
 description: Homely alarm system and sensors in Home Assistant through MQTT
 url: https://github.com/wesenrog/ha-addons

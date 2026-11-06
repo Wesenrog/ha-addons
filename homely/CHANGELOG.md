@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3
+
+- Every device entity except Online has the attribute `homely_last_updated`, Homely's own
+  time for the state, published on `homely/<location>/<device>/attributes`. Entity ids,
+  `unique_id`s and states are unchanged.
+
 ## 0.4.2
 
 - Moved to the `ha-addons` repository; no change in behaviour, entity ids or `unique_id`s.

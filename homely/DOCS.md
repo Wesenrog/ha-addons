@@ -62,6 +62,10 @@ One device per Homely sensor, with entities for the states it reports:
 
 States the add-on doesn't recognise are skipped. Run with `log_level: debug` to see them.
 
+Every device entity except Online has the attribute `homely_last_updated`: when Homely last
+received that state from the sensor, as Homely reports it (UTC). Compared with the entity's
+`last_changed`, it shows how long a change took to reach Home Assistant.
+
 What a sensor's alarm state means depends on the model, because the data looks the same for a
 motion sensor and a door contact. These models are known:
 

@@ -1,6 +1,6 @@
 import pytest
 
-from homely_bridge.model import device_entities, device_state_payload, normalize_alarm_state
+from homely_bridge.model import device_entities, device_last_updated, device_state_payload, normalize_alarm_state
 
 
 @pytest.mark.parametrize(
@@ -46,6 +46,16 @@ def test_motion_sensor(home_payload):
         "diagnostic_networklinkstrength": 87,
         "diagnostic_networklinkaddress": "0015BC002C102E91",
     }
+
+
+def test_last_updated_per_entity(home_payload):
+    device = home_payload["devices"][0]
+    stamps = device_last_updated(device)
+    assert stamps["alarm_alarm"] == "2022-03-07T10:17:06.109Z"
+    assert stamps["temperature_temperature"] == "2022-03-07T10:16:23.730Z"
+    # Online has no timestamp of its own; every other entity has one
+    assert set(stamps) == set(device_state_payload(device)) - {"online"}
+    assert device_last_updated({"features": {"alarm": {"states": {"alarm": {"value": True}}}}}) == {"alarm_alarm": None}
 
 
 def test_thermostat_scaled_and_unknown_states_ignored(home_payload):

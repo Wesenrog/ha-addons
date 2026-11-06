@@ -15,6 +15,7 @@ from .model import (
     ONLINE_SPEC,
     device_entities,
     device_has_problem,
+    device_last_updated,
     device_state_payload,
     entity_name,
     normalize_alarm_state,
@@ -120,6 +121,9 @@ class Bridge:
     def _data_availability_topic(self) -> str:
         return f"{self._base}/availability"
 
+    def _device_attributes_topic(self, device_id: str) -> str:
+        return f"{self._base}/{device_id}/attributes"
+
     def _device_availability_topic(self, device_id: str) -> str:
         return f"{self._base}/{device_id}/availability"
 
@@ -221,13 +225,20 @@ class Bridge:
         without_device = with_device[:2]
         for spec, _raw in device_entities(device):
             topic = discovery_topic(self._config.discovery_prefix, spec.component, device_id, spec.key)
+            # Every entity but Online carries when Homely last received its state
+            attributes = {} if spec is ONLINE_SPEC else {
+                "json_attributes_topic": self._device_attributes_topic(device_id),
+                "json_attributes_template": f"{{{{ {{'homely_last_updated': value_json.get('{spec.key}')}} | tojson }}}}",
+            }
             payload = discovery_payload(
                 spec, f"homely_{device_id}", self._device_state_topic(device_id),
                 without_device if spec is ONLINE_SPEC else with_device,
-                info, self._config.language, entity_id_prefix,
+                info, self._config.language, entity_id_prefix, **attributes,
             )
             self._publish_discovery(topic, payload)
             topics.add(topic)
+        # Attributes first, so the state change is recorded with its own lastUpdated
+        self._mqtt.publish(self._device_attributes_topic(device_id), device_last_updated(device))
         self._mqtt.publish(self._device_state_topic(device_id), device_state_payload(device))
         # Online unless Homely reports the device offline
         online = to_bool(device.get("online")) is not False
@@ -242,6 +253,7 @@ class Bridge:
             self._mqtt.publish(topic, "")
             self._discovery.pop(topic, None)
         self._mqtt.publish(self._device_state_topic(device_id), "")
+        self._mqtt.publish(self._device_attributes_topic(device_id), "")
         self._mqtt.publish(self._device_availability_topic(device_id), "")
         self._device_online.pop(device_id, None)
         self._missing.pop(device_id, None)

@@ -42,6 +42,7 @@ def test_device_removed_only_after_two_missing_snapshots(home_payload):
     bridge.apply_snapshot(smaller)
     assert gone not in bridge.devices
     assert pub.last(topic) == ""
+    assert pub.last(f"homely/{home_payload['locationId']}/{gone}/attributes") == ""
 
 
 def test_discovery_not_resent_when_unchanged(home_payload):
