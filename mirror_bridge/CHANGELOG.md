@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.10.0
+
+- **`text` entities**: writable, an MQTT text held to the source's own
+  pattern and length, and checked against them again before `text.set_value`;
+  read-only, a sensor.
+- **A mirrored text is unavailable on its own** while its source is
+  unavailable or unknown, as well as with the link, so the mirror is never
+  handed a state its pattern refuses. This covers the `input_datetime` helpers
+  too.
+
 ## 0.9.0
 
 - **Sensors and binary sensors carry their attributes**, as one JSON object on

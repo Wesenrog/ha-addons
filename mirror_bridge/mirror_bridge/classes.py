@@ -26,7 +26,7 @@ class Command:
     """
     service: str                    # "climate.set_temperature"
     data_field: str                 # "temperature"
-    kind: str                       # "onoff" | "number" | "enum" | "press" | "datetime" | "xy" | "relay"
+    kind: str                       # "onoff" | "number" | "enum" | "press" | "datetime" | "text" | "xy" | "relay"
     topic_key: str = "command_topic"  # discovery field carrying this topic
     enum_attr: str | None = None    # attribute listing the allowed values
     min_attr: str | None = None     # attribute holding the lower bound
@@ -48,6 +48,10 @@ class Spec:
     # Publish every attribute as one JSON object on the "attributes" topic,
     # for the MQTT platform's json_attributes_topic.
     json_attributes: bool = False
+    # Unavailable on its own as well as with the link, while the source is
+    # unavailable or unknown. For a platform that refuses a state it cannot
+    # hold - a text held to a pattern - rather than show it.
+    own_availability: bool = False
 
 
 ONOFF = Command(service="homeassistant.turn_on", data_field="", kind="onoff")
@@ -183,7 +187,21 @@ def describe(entity_id: str, state: dict, writable: bool,
         return Spec(component="text",
                     config={**common, "pattern": pattern, "min": 5, "max": 19},
                     commands={"set": Command(service="input_datetime.set_datetime",
-                                             data_field=field_name, kind="datetime")})
+                                             data_field=field_name, kind="datetime")},
+                    own_availability=True)
+
+    # --- text ----------------------------------------------------------------
+    # Writable, an MQTT text held to the source's own length and pattern, and
+    # checked against them again on the way in. Read-only, a sensor.
+    if domain == "text":
+        if not writable:
+            return Spec(component="sensor", config=common)
+        return Spec(component="text",
+                    config={**common, **_carry(attrs, "pattern"),
+                            "min": attrs.get("min", 0), "max": attrs.get("max", 255)},
+                    commands={"set": Command(service="text.set_value", data_field="value",
+                                             kind="text")},
+                    own_availability=True)
 
     # --- lights --------------------------------------------------------------
     # A read-only light stays a sensor: the MQTT light platform requires a
