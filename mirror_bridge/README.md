@@ -56,6 +56,7 @@ else is generic.
 | `input_button` | not mirrored | `button`, press |
 | `sensor` named in `relays` | `sensor` | `sensor` with all attributes, and a JSON command relayed to a topic |
 | `input_datetime` | `sensor` | `text` in the helper's format, checked as a real date and time |
+| `text` | `sensor` | `text` held to the source's pattern and length |
 
 A light's writable form is decided per entity from its `supported_color_modes`:
 an on/off bulb gets no brightness slider, and one without `color_temp` gets no

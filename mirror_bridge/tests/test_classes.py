@@ -1,6 +1,6 @@
 """Buttons and date/time helpers (0.5.0), scenes, light colour and effects
-(0.6.0), relays (0.7.0), number helpers, timers and scripts (0.8.0) on the
-mirror: what each becomes, and that a command is checked before
+(0.6.0), relays (0.7.0), number helpers, timers and scripts (0.8.0), text
+(0.10.0) on the mirror: what each becomes, and that a command is checked before
 any service is called."""
 import asyncio
 import json
@@ -338,3 +338,73 @@ if __name__ == "__main__":
             print("FAIL", name, repr(ex))
     print("%d ok, %d failed" % (len(tests) - failed, failed))
     sys.exit(1 if failed else 0)
+
+
+# --- text (0.10.0) ----------------------------------------------------------
+UNTIL = {"entity_id": "text.zone_until", "state": "21:30",
+         "attributes": {"min": 0, "max": 5, "mode": "text",
+                        "pattern": r"^$|^([01]?[0-9]|2[0-3])[:.]?[0-5][0-9]$",
+                        "friendly_name": "Zone Until"}}
+
+
+def test_a_writable_text_is_text_held_to_the_source_pattern_and_length():
+    spec = classes.describe("text.zone_until", UNTIL, True)
+    assert spec.component == "text"
+    assert (spec.config["pattern"], spec.config["min"], spec.config["max"]) == (
+        UNTIL["attributes"]["pattern"], 0, 5)
+    assert spec.commands["set"].service == "text.set_value"
+    assert "set" in classes.ALLOWED["text"]
+
+
+def test_a_read_only_text_is_a_sensor():
+    assert classes.describe("text.zone_until", UNTIL, False).component == "sensor"
+
+
+def test_setting_a_text_calls_set_value_with_it_unchanged():
+    b, ha, _ = bridge([UNTIL])
+    run(b.handle_command("mirror/cmd/text.zone_until/set", "23:15"))
+    assert ha.calls == [("text", "set_value", {"entity_id": "text.zone_until"},
+                         {"value": "23:15"})]
+
+
+def test_a_text_outside_the_pattern_or_length_is_refused():
+    b, ha, _ = bridge([UNTIL])
+    for bad in ("25:00", "kl 21", "21:300", "123456"):
+        run(b.handle_command("mirror/cmd/text.zone_until/set", bad))
+    assert ha.calls == []
+
+
+def test_a_bad_pattern_on_the_source_refuses_rather_than_raises():
+    st = dict(UNTIL, attributes=dict(UNTIL["attributes"], pattern="(("))
+    b, ha, _ = bridge([st])
+    run(b.handle_command("mirror/cmd/text.zone_until/set", "21:30"))
+    assert ha.calls == []
+
+
+def test_a_text_is_unavailable_on_its_own_while_the_source_is():
+    b, _ha, broker = bridge([UNTIL])
+    spec = classes.describe("text.zone_until", UNTIL, True)
+    payload = b._discovery("text.zone_until", UNTIL, spec)
+    assert "availability_topic" not in payload
+    assert payload["availability_mode"] == "all"
+    assert [a["topic"] for a in payload["availability"]] == [
+        "mirror/link", "mirror/state/text/zone_until/available"]
+    b.publish_entity("text.zone_until", UNTIL)
+    assert broker.sent["mirror/state/text/zone_until/available"] == "1"
+    assert broker.sent["mirror/state/text/zone_until/state"] == "21:30"
+    b.publish_entity("text.zone_until", dict(UNTIL, state="unavailable"))
+    assert broker.sent["mirror/state/text/zone_until/available"] == "0"
+    # The last state stays; the mirror is never handed one it would refuse.
+    assert broker.sent["mirror/state/text/zone_until/state"] == "21:30"
+
+
+def test_a_writable_datetime_has_its_own_availability_too():
+    spec = classes.describe("input_datetime.home", RETURN, True)
+    assert spec.own_availability is True
+
+
+def test_other_classes_keep_the_link_alone():
+    b, _ha, _broker = bridge([CANCEL])
+    payload = b._discovery("button.cancel", CANCEL, classes.describe("button.cancel", CANCEL, True))
+    assert payload["availability_topic"] == "mirror/link"
+    assert "availability" not in payload

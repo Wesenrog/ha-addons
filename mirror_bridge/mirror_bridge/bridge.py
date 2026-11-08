@@ -6,7 +6,7 @@ writable because it carries the writable label. Nothing the mirror sends can
 widen that, because every command is checked against the current membership set
 before a service is ever called.
 """
-import datetime, json, logging
+import datetime, json, logging, re
 
 from . import classes
 
@@ -101,7 +101,15 @@ class Bridge:
                                  json.dumps(self._discovery(entity_id, state, spec)))
             self._published[entity_id] = spec.component
 
-        self._broker.publish(cfg.state_topic(entity_id), str(state.get("state")))
+        if spec.own_availability:
+            # Availability first, so the mirror never holds a state it refuses.
+            usable = state.get("state") not in ("unavailable", "unknown", None)
+            self._broker.publish(cfg.attribute_topic(entity_id, "available"),
+                                 "1" if usable else "0")
+            if usable:
+                self._broker.publish(cfg.state_topic(entity_id), str(state.get("state")))
+        else:
+            self._broker.publish(cfg.state_topic(entity_id), str(state.get("state")))
         attributes = state.get("attributes", {}) or {}
         if spec.json_attributes:
             self._broker.publish(cfg.attribute_topic(entity_id, "attributes"),
@@ -132,6 +140,12 @@ class Bridge:
             "payload_not_available": "0",
             **spec.config,
         }
+        if spec.own_availability:
+            del payload["availability_topic"]
+            payload["availability"] = [
+                {"topic": t, "payload_available": "1", "payload_not_available": "0"}
+                for t in (cfg.availability_topic, cfg.attribute_topic(entity_id, "available"))]
+            payload["availability_mode"] = "all"
 
         if meta.get("device"):
             # Reproduce the source's own structure: a device carrying the long
@@ -283,6 +297,8 @@ class Bridge:
             return True if payload.strip() == "PRESS" else None
         if command.kind == "datetime":
             return _datetime_value(command.data_field, payload.strip())
+        if command.kind == "text":
+            return _text_value(payload, attributes)
         if command.kind == "xy":
             return _xy_value(payload)
         if command.kind == "relay":
@@ -308,6 +324,22 @@ def _datetime_value(field_name, text):
         except ValueError:
             continue
     return None
+
+
+def _text_value(text, attributes):
+    """The text as sent, if it is within the source's length and matches its
+    pattern - the checks `text.set_value` makes - or None."""
+    low, high = int(attributes.get("min", 0)), int(attributes.get("max", 255))
+    if not low <= len(text) <= high:
+        return None
+    pattern = attributes.get("pattern")
+    if pattern:
+        try:
+            if not re.match(pattern, text):
+                return None
+        except re.error:
+            return None
+    return text
 
 
 def _xy_value(text):
