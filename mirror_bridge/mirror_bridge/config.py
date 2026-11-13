@@ -42,6 +42,13 @@ class Config:
         # when the tunnel drops rather than showing stale values as live.
         return f"{self.base_topic}/link"
 
+    @property
+    def alive_topic(self):
+        # The add-on's own liveness: "1" while it holds both the broker and
+        # Home Assistant, "0" by its will or on a clean stop. Under state/ so
+        # the bridge connection that carries the states carries this too.
+        return f"{self.base_topic}/state/_bridge/alive"
+
 
 def parse_relays(text):
     """"entity=topic" pairs, comma-separated -> {entity: topic}. A malformed

@@ -15,11 +15,11 @@ URL = "ws://supervisor/core/websocket"
 class HomeAssistant:
     def __init__(self, token):
         self._token = token
-        self.listeners_to_restore = []
         self._ws = None
         self._id = 0
         self._pending = {}
         self._listeners = []
+        self._tasks = set()     # running event callbacks, held so they finish
 
     async def connect(self):
         # A fresh connection means fresh subscription ids, so drop any state
@@ -42,7 +42,11 @@ class HomeAssistant:
         payload["id"] = self._id
         future = asyncio.get_running_loop().create_future()
         self._pending[self._id] = future
-        await self._ws.send(json.dumps(payload))
+        try:
+            await self._ws.send(json.dumps(payload))
+        except Exception:
+            self._pending.pop(payload["id"], None)
+            raise
         return await future
 
     # --- the commands this add-on uses --------------------------------------
@@ -68,8 +72,6 @@ class HomeAssistant:
         Python rather than in a Jinja condition, which is why this scales to
         every state change on a busy instance."""
         self._listeners.append((event_type, callback))
-        if (event_type, callback) not in self.listeners_to_restore:
-            self.listeners_to_restore.append((event_type, callback))
         await self._send({"type": "subscribe_events", "event_type": event_type})
 
     async def run(self):
@@ -79,18 +81,36 @@ class HomeAssistant:
         a Home Assistant restart drops this socket, and the add-on has to come
         back on its own rather than relying on the Supervisor restarting it.
         """
-        async for raw in self._ws:
-            msg = json.loads(raw)
-            kind = msg.get("type")
-            if kind == "result":
-                future = self._pending.pop(msg["id"], None)
-                if future and not future.done():
-                    if msg.get("success"):
-                        future.set_result(msg.get("result"))
-                    else:
-                        future.set_exception(RuntimeError(str(msg.get("error"))))
-            elif kind == "event":
-                event = msg["event"]
-                for event_type, callback in self._listeners:
-                    if event["event_type"] == event_type:
-                        asyncio.create_task(callback(event))
+        try:
+            async for raw in self._ws:
+                msg = json.loads(raw)
+                kind = msg.get("type")
+                if kind == "result":
+                    future = self._pending.pop(msg["id"], None)
+                    if future and not future.done():
+                        if msg.get("success"):
+                            future.set_result(msg.get("result"))
+                        else:
+                            future.set_exception(RuntimeError(str(msg.get("error"))))
+                elif kind == "event":
+                    event = msg["event"]
+                    for event_type, callback in self._listeners:
+                        if event["event_type"] == event_type:
+                            task = asyncio.create_task(self._deliver(callback, event))
+                            self._tasks.add(task)
+                            task.add_done_callback(self._tasks.discard)
+        finally:
+            # Nobody will answer these now. Left pending, whoever awaits one
+            # waits for ever - the caller's reconnect included.
+            pending, self._pending = self._pending, {}
+            for future in pending.values():
+                if not future.done():
+                    future.set_exception(
+                        ConnectionError("Home Assistant closed the connection"))
+
+    @staticmethod
+    async def _deliver(callback, event):
+        try:
+            await callback(event)
+        except Exception:
+            _LOG.exception("handling %s failed", event.get("event_type"))

@@ -40,13 +40,14 @@ class FakeHA:
 
 class FakeBroker:
     def __init__(self):
-        self.sent = {}
+        self.sent, self.retracted = {}, []
 
     def publish(self, topic, payload, retain=True):
         self.sent[topic] = payload
 
     def retract(self, topic):
         self.sent.pop(topic, None)
+        self.retracted.append(topic)
 EDITOR = {"entity_id": "sensor.editor", "state": "ok",
           "attributes": {"zones": {"a": {"programme": {"mon": [[0, 19.0]]}}},
                          "last": None, "friendly_name": "Editor"}}
@@ -326,20 +327,6 @@ def test_a_sensor_and_a_binary_sensor_carry_their_attributes():
     assert classes.describe("binary_sensor.p", bs, False).json_attributes
 
 
-if __name__ == "__main__":
-    tests = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_")]
-    failed = 0
-    for name, fn in tests:
-        try:
-            fn()
-            print("ok  ", name)
-        except Exception as ex:                                   # noqa: BLE001
-            failed += 1
-            print("FAIL", name, repr(ex))
-    print("%d ok, %d failed" % (len(tests) - failed, failed))
-    sys.exit(1 if failed else 0)
-
-
 # --- text (0.10.0) ----------------------------------------------------------
 UNTIL = {"entity_id": "text.zone_until", "state": "21:30",
          "attributes": {"min": 0, "max": 5, "mode": "text",
@@ -381,30 +368,34 @@ def test_a_bad_pattern_on_the_source_refuses_rather_than_raises():
     assert ha.calls == []
 
 
-def test_a_text_is_unavailable_on_its_own_while_the_source_is():
+def test_a_text_is_unavailable_while_the_source_is_unavailable_or_unknown():
     b, _ha, broker = bridge([UNTIL])
-    spec = classes.describe("text.zone_until", UNTIL, True)
-    payload = b._discovery("text.zone_until", UNTIL, spec)
-    assert "availability_topic" not in payload
-    assert payload["availability_mode"] == "all"
-    assert [a["topic"] for a in payload["availability"]] == [
-        "mirror/link", "mirror/state/text/zone_until/available"]
     b.publish_entity("text.zone_until", UNTIL)
     assert broker.sent["mirror/state/text/zone_until/available"] == "1"
     assert broker.sent["mirror/state/text/zone_until/state"] == "21:30"
-    b.publish_entity("text.zone_until", dict(UNTIL, state="unavailable"))
-    assert broker.sent["mirror/state/text/zone_until/available"] == "0"
-    # The last state stays; the mirror is never handed one it would refuse.
-    assert broker.sent["mirror/state/text/zone_until/state"] == "21:30"
+    for gone in ("unavailable", "unknown"):
+        b.publish_entity("text.zone_until", dict(UNTIL, state=gone))
+        assert broker.sent["mirror/state/text/zone_until/available"] == "0"
+        # The last state stays; the mirror is never handed one it would refuse.
+        assert broker.sent["mirror/state/text/zone_until/state"] == "21:30"
+        b.publish_entity("text.zone_until", UNTIL)
+        assert broker.sent["mirror/state/text/zone_until/available"] == "1"
 
 
-def test_a_writable_datetime_has_its_own_availability_too():
-    spec = classes.describe("input_datetime.home", RETURN, True)
-    assert spec.own_availability is True
+def test_a_writable_datetime_refuses_unknown_too():
+    assert classes.describe("input_datetime.home", RETURN, True).refuses_unknown is True
+    assert classes.describe("input_datetime.home", RETURN, False).refuses_unknown is False
 
 
-def test_other_classes_keep_the_link_alone():
-    b, _ha, _broker = bridge([CANCEL])
-    payload = b._discovery("button.cancel", CANCEL, classes.describe("button.cancel", CANCEL, True))
-    assert payload["availability_topic"] == "mirror/link"
-    assert "availability" not in payload
+if __name__ == "__main__":
+    tests = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_")]
+    failed = 0
+    for name, fn in tests:
+        try:
+            fn()
+            print("ok  ", name)
+        except Exception as ex:                                   # noqa: BLE001
+            failed += 1
+            print("FAIL", name, repr(ex))
+    print("%d ok, %d failed" % (len(tests) - failed, failed))
+    sys.exit(1 if failed else 0)
