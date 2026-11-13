@@ -4,8 +4,8 @@ Publishes label-selected Home Assistant entities to MQTT with discovery, so the
 remote mirror needs no YAML and the Pi needs no restarts.
 
 **Status: in production.** It is the mirror - the statestream block, the
-dispatcher automations and the mirror's MQTT YAML have all been removed. As of
-version 0.9.0 it publishes over two hundred entities by label: every heating
+dispatcher automations and the mirror's MQTT YAML have all been removed. It publishes
+over two hundred entities by label: every heating
 zone with its status and cancel button, the thermostats with their battery and
 temperature sensors, away with its return time, a schedule editor through a
 relay, the ventilation and cooling controls and their timers, and the lights
@@ -99,7 +99,20 @@ its static form.
 - **Removal is clean.** An empty retained payload on the discovery topic makes
   Home Assistant drop the entity along with its registry entry - the thing YAML
   cannot do, and the reason the instance this was built for once had 12 968
-  orphaned entities to clear out.
+  orphaned entities to clear out. It holds across restarts too: at every start
+  the add-on reads back what the broker still holds under the discovery prefix
+  and `<base>/state/`, and clears whatever belongs to no current member - a
+  label taken off while it was down, or the platform an entity had before the
+  writable label changed it. Under a shared discovery prefix only configs it
+  wrote itself are touched.
+- **Live means three things.** Each entity is available only while all of
+  three topics say `1`: `<base>/link`, the tunnel, published by the mosquitto
+  bridge; `<base>/state/_bridge/alive`, the add-on itself, `0` by its MQTT
+  will, on a clean stop and while Home Assistant is away; and the entity's own
+  `available`, `0` while the source is unavailable. A source that is unknown
+  is unknown on the mirror (`None` as the state) - except a writable text or
+  date and time, whose pattern has no unknown, and which is unavailable
+  instead. The words `unavailable` and `unknown` never go out as a state.
 - **No secrets are configured.** `services: ["mqtt:need"]` has the Supervisor
   inject broker credentials, and `homeassistant_api: true` provides
   `SUPERVISOR_TOKEN` for the websocket API.
@@ -246,6 +259,7 @@ The discovery subtree has to reach the mirror, and the mirror has to be told to
 look for it:
 
 - add `topic mirror/discovery/# out 1` to the `mirror_state` bridge connection
-  in `mirror/pi-bridge.conf`
+  in `mirror/pi-bridge.conf`, next to `topic mirror/state/# out 1` (which
+  carries the add-on's liveness topic as well as the states)
 - set the mirror's MQTT `discovery_prefix` to `mirror/discovery` in its
   integration options

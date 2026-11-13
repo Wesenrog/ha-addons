@@ -12,6 +12,9 @@ from . import classes
 
 _LOG = logging.getLogger(__name__)
 
+# A button and a scene have no state on the MQTT platform.
+STATELESS = ("button", "scene")
+
 
 class Bridge:
     def __init__(self, cfg, ha, broker):
@@ -26,6 +29,8 @@ class Bridge:
         # already-composed string is what keeps names from doubling up.
         self._meta = {}
         self._published = {}    # entity_id -> component, for clean retraction
+        self._topics = {}       # entity_id -> its state topics, likewise
+        self._available = {}    # entity_id -> the availability last published
         self._unsupported = set()
 
     # --- membership ---------------------------------------------------------
@@ -90,26 +95,47 @@ class Bridge:
         spec = classes.describe(entity_id, state, writable,
                                 relay=self._cfg.relays.get(entity_id))
         if spec is None:
+            # A class that went with the writable label - a button made
+            # read-only - leaves the mirror with it.
+            self._retract(entity_id)
             if entity_id not in self._unsupported:
                 self._unsupported.add(entity_id)
                 _LOG.warning("no mirror class for %s - ignoring", entity_id)
             return
+        self._unsupported.discard(entity_id)
 
         cfg = self._cfg
-        if announce:
+        # A member that had no state when it was labelled is announced by the
+        # first state it gets.
+        if announce or entity_id not in self._published:
+            announce = True
+            before = self._published.get(entity_id)
+            if before and before != spec.component:
+                # The writable label changes the platform (sensor to number),
+                # and the old one's discovery would otherwise stay behind.
+                self._broker.retract(cfg.discovery_topic(before, entity_id))
+            topics = self._state_topics(entity_id, spec)
+            for topic in self._topics.get(entity_id, set()) - topics:
+                self._broker.retract(topic)
             self._broker.publish(cfg.discovery_topic(spec.component, entity_id),
                                  json.dumps(self._discovery(entity_id, state, spec)))
             self._published[entity_id] = spec.component
+            self._topics[entity_id] = topics
 
-        if spec.own_availability:
-            # Availability first, so the mirror never holds a state it refuses.
-            usable = state.get("state") not in ("unavailable", "unknown", None)
+        # Availability first, so the mirror never holds a state it refuses. A
+        # source that is unavailable is unavailable here; one that is unknown
+        # is unknown ("None" to every MQTT platform that has a state), except
+        # where the class says the platform cannot hold that.
+        value = state.get("state")
+        available = value not in ("unavailable", None) and not (
+            spec.refuses_unknown and value == "unknown")
+        if announce or self._available.get(entity_id) != available:
+            self._available[entity_id] = available
             self._broker.publish(cfg.attribute_topic(entity_id, "available"),
-                                 "1" if usable else "0")
-            if usable:
-                self._broker.publish(cfg.state_topic(entity_id), str(state.get("state")))
-        else:
-            self._broker.publish(cfg.state_topic(entity_id), str(state.get("state")))
+                                 "1" if available else "0")
+        if available and spec.component not in STATELESS:
+            self._broker.publish(cfg.state_topic(entity_id),
+                                 "None" if value == "unknown" else str(value))
         attributes = state.get("attributes", {}) or {}
         if spec.json_attributes:
             self._broker.publish(cfg.attribute_topic(entity_id, "attributes"),
@@ -135,17 +161,15 @@ class Bridge:
             # it and names the entity after its display name.
             "default_entity_id": f"{spec.component}.{entity_id.split('.', 1)[1]}",
             "unique_id": f"mirror_{entity_id.replace('.', '_')}",
-            "availability_topic": cfg.availability_topic,
-            "payload_available": "1",
-            "payload_not_available": "0",
+            # Live only while all three hold: the tunnel, this add-on, and the
+            # source entity itself.
+            "availability": [
+                {"topic": t, "payload_available": "1", "payload_not_available": "0"}
+                for t in (cfg.availability_topic, cfg.alive_topic,
+                          cfg.attribute_topic(entity_id, "available"))],
+            "availability_mode": "all",
             **spec.config,
         }
-        if spec.own_availability:
-            del payload["availability_topic"]
-            payload["availability"] = [
-                {"topic": t, "payload_available": "1", "payload_not_available": "0"}
-                for t in (cfg.availability_topic, cfg.attribute_topic(entity_id, "available"))]
-            payload["availability_mode"] = "all"
 
         if meta.get("device"):
             # Reproduce the source's own structure: a device carrying the long
@@ -170,8 +194,7 @@ class Bridge:
             # The one platform that does not call the entity state its "state":
             # for a thermostat that topic carries the hvac mode.
             payload["mode_state_topic"] = cfg.state_topic(entity_id)
-        elif spec.component not in ("button", "scene"):
-            # A button and a scene have no state on the MQTT platform.
+        elif spec.component not in STATELESS:
             payload["state_topic"] = cfg.state_topic(entity_id)
 
         # Everything else a platform reads from its own topic - a thermostat's
@@ -183,12 +206,81 @@ class Bridge:
             payload[command.topic_key] = cfg.command_topic(entity_id, capability)
         return payload
 
+    def _state_topics(self, entity_id, spec):
+        """Every retained topic the entity has under state/, so a retraction
+        leaves none of them behind."""
+        cfg = self._cfg
+        names = {"available", *spec.attributes}
+        if spec.json_attributes:
+            names.add("attributes")
+        if spec.component not in STATELESS:
+            names.add("state")
+        return {cfg.attribute_topic(entity_id, name) for name in names}
+
     def _retract(self, entity_id):
         component = self._published.pop(entity_id, None)
+        topics = self._topics.pop(entity_id, set())
+        self._available.pop(entity_id, None)
         if component:
             self._broker.retract(self._cfg.discovery_topic(component, entity_id))
-            self._broker.retract(self._cfg.state_topic(entity_id))
+            for topic in sorted(topics):
+                self._broker.retract(topic)
             _LOG.info("retracted %s", entity_id)
+
+    def reconcile(self, retained):
+        """Retract what the broker holds for entities no longer mirrored.
+
+        `retained` is topic -> payload for everything retained under the
+        discovery prefix and under state/, read before this run published
+        anything. Membership changes while the add-on runs are retracted as
+        they happen; this is for the ones it was not running to see - a label
+        taken off, or the writable label toggled, while it was down.
+        """
+        cfg = self._cfg
+        keep = {cfg.alive_topic}
+        waiting = set()
+        for entity_id in self._members:
+            component = self._published.get(entity_id)
+            if component:
+                keep.add(cfg.discovery_topic(component, entity_id))
+                keep |= self._topics[entity_id]
+            elif entity_id not in self._unsupported:
+                # Labelled but without a state so far - an integration still
+                # loading after a restart. What it had is left alone.
+                waiting.add(entity_id)
+        waiting_state = tuple(cfg.attribute_topic(e, "") for e in waiting)
+        waiting_discovery = {e.replace(".", "_") for e in waiting}
+
+        stale = []
+        for topic, payload in retained.items():
+            if topic in keep:
+                continue
+            if topic.startswith(f"{cfg.base_topic}/state/"):
+                if not topic.startswith(waiting_state):
+                    stale.append(topic)
+            elif topic.startswith(f"{cfg.discovery_prefix}/"):
+                # The prefix may be shared (`homeassistant`), so only a config
+                # this add-on wrote is ever touched.
+                if (self._is_ours(payload)
+                        and topic.split("/")[-2] not in waiting_discovery):
+                    stale.append(topic)
+        for topic in sorted(stale):
+            self._broker.retract(topic)
+        if stale:
+            _LOG.info("retracted %d stale topics left from an earlier run", len(stale))
+
+    def _is_ours(self, payload):
+        try:
+            config = json.loads(payload)
+        except ValueError:
+            return False
+        if not isinstance(config, dict):
+            return False
+        links = [config.get("availability_topic")]
+        links += [a.get("topic") for a in config.get("availability") or []
+                  if isinstance(a, dict)]
+        return (str(config.get("unique_id", "")).startswith("mirror_")
+                and self._cfg.availability_topic in links)
 
     async def reannounce(self):
         """Republish discovery and state for everything currently mirrored."""
@@ -242,9 +334,6 @@ class Bridge:
             _LOG.warning("rejecting payload %r for %s/%s", payload, entity_id, capability)
             return
 
-        # TODO(verify against the live system): confirm homeassistant.turn_on /
-        # turn_off is the right generic for the onoff kind across the domains we
-        # label, and that call_service accepts an empty service_data.
         if command.kind == "relay":
             # Passed on unchanged, and never retained: a retained command would
             # run again every time the program behind it subscribed.

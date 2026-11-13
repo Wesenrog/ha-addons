@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.11.0
+
+- **A mirrored entity is live only while three things are**: the tunnel, this
+  add-on and its source entity. Every entity now has its own `available`
+  topic, `0` while the source is unavailable, where before a numeric sensor or
+  a thermostat was handed the word `unavailable` as a state, refused it, and
+  went on showing its last value as live.
+- **An unknown source is unknown on the mirror**: the state goes out as
+  `None`, which every MQTT platform with a state reads as unknown. The
+  pattern-held texts have no unknown and stay unavailable instead, as before.
+- **The add-on says whether it is running**, on `<base>/state/_bridge/alive`:
+  `1` while it holds both the broker and Home Assistant, `0` by its MQTT will,
+  on a clean stop and while Home Assistant is away. It is under `state/`, so
+  the bridge connection that carries the states carries it and nothing on
+  either broker has to change.
+- **Retraction survives a restart.** At every start the retained discovery
+  and state topics are read back from the broker, and those of entities no
+  longer mirrored are cleared - a label taken off while the add-on was down
+  used to stay on the mirror for good. Under a shared discovery prefix only
+  configs this add-on wrote are touched, and a labelled entity that has no
+  state yet (an integration loading late) is left alone.
+- **A changed platform retracts the old one**: adding or removing the writable
+  label turns a sensor into a number, a binary sensor into a switch, and the
+  old discovery is now cleared. A button or scene made read-only leaves the
+  mirror. Retracting clears all of an entity's topics, not only its state.
+- **An entity labelled before it has a state** is announced by its first one.
+- **A button and a scene no longer publish a state topic** nothing read.
+- **Robustness**: a request to Home Assistant fails when the connection
+  closes under it instead of waiting for ever; a retained command is
+  ignored; exceptions in event and command handling are logged.
+
 ## 0.10.0
 
 - **`text` entities**: writable, an MQTT text held to the source's own

@@ -48,10 +48,11 @@ class Spec:
     # Publish every attribute as one JSON object on the "attributes" topic,
     # for the MQTT platform's json_attributes_topic.
     json_attributes: bool = False
-    # Unavailable on its own as well as with the link, while the source is
-    # unavailable or unknown. For a platform that refuses a state it cannot
-    # hold - a text held to a pattern - rather than show it.
-    own_availability: bool = False
+    # Unavailable while the source is unknown, as well as while it is
+    # unavailable. Every other platform is handed "None" and shows unknown;
+    # this is for one that has no unknown and refuses a state it cannot hold
+    # - a text held to a pattern.
+    refuses_unknown: bool = False
 
 
 ONOFF = Command(service="homeassistant.turn_on", data_field="", kind="onoff")
@@ -188,7 +189,7 @@ def describe(entity_id: str, state: dict, writable: bool,
                     config={**common, "pattern": pattern, "min": 5, "max": 19},
                     commands={"set": Command(service="input_datetime.set_datetime",
                                              data_field=field_name, kind="datetime")},
-                    own_availability=True)
+                    refuses_unknown=True)
 
     # --- text ----------------------------------------------------------------
     # Writable, an MQTT text held to the source's own length and pattern, and
@@ -201,7 +202,7 @@ def describe(entity_id: str, state: dict, writable: bool,
                             "min": attrs.get("min", 0), "max": attrs.get("max", 255)},
                     commands={"set": Command(service="text.set_value", data_field="value",
                                              kind="text")},
-                    own_availability=True)
+                    refuses_unknown=True)
 
     # --- lights --------------------------------------------------------------
     # A read-only light stays a sensor: the MQTT light platform requires a
